@@ -20,7 +20,8 @@ class Connection:
             client_handler = threading.Thread(target=self.handle, args=[self.client])
             client_handler.start()
 
-            while True:
+            msgcl = ""
+            while msgcl != "disconnect" and msgcl != "kill":
                 msgcl = input("Message:")
                 self.client.send(msgcl.encode())
             self.client.close()
@@ -33,8 +34,7 @@ class Connection:
             msgsrv = msgsrv.decode()
             print(f"\nMessage du serveur: {msgsrv}")
             match msgsrv:
-                case "dostuff":
-                    print("didstuff")
+                case "kill":
                     break
         conn.close()
 
