@@ -33,7 +33,8 @@ class Server():
                 self.client, addr = self.server.accept()
                 logging.info(f"Connected to {addr}")
 
-                while message != "reset" and message != "disconnect" and not self.killed:
+                message = ""  # reset so we can reconnect
+                while not self.killed and message != "reset" and message != "disconnect":
                     msgcl = self.client.recv(1024)
                     if not msgcl:
                         break  # prevents infinite loop on disconnect
@@ -42,13 +43,16 @@ class Server():
                     logging.info(f"Message from {addr}: {message}")
 
                     self.__handle(message, addr)
-                    # Handle function for readability
 
                 logging.info(f"Client at {addr} disconnected.")
                 self.client.close()
 
             logging.debug("Closing server.")
             self.server.close()
+
+    """
+    Handle function for readability
+    """
 
     def __handle(self, message: str, addr: tuple):
         match message:
@@ -64,6 +68,11 @@ class Server():
                 logging.info(
                     f"Client at {addr} requested a reset.")
 
+    """
+    Retries to bind the socked every 10 seconds.
+    Allows the server to be reset.
+    """
+
     def __bind(self, host: tuple):
         while True:
             try:
@@ -71,7 +80,7 @@ class Server():
                 logging.debug(f"Socket bound to {host}")
             except OSError:
                 logging.info(f"Port {host[1]} not available. Retrying...")
-                time.sleep(1)
+                time.sleep(10)
                 continue
             else:
                 break
@@ -80,10 +89,11 @@ class Server():
         try:
             self.client.send("kill".encode())
             self.client.close()
-        except AttributeError:
-            pass  # client not connected
-        self.server.close()
-        self.killed = True
+            self.server.close()
+            self.killed = True
+        except Exception:
+            # Do not care about errors here, we're making sure the server is killed
+            pass
 
 
 if __name__ == "__main__":
