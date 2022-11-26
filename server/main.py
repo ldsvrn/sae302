@@ -21,30 +21,23 @@ class Server():
         while not self.killed:
             self.server = socket.socket()
             logging.debug("Created socket")
-            while True:
-                try:
-                    self.server.bind(self.host)
-                    logging.debug(f"Socket bound to {self.host}")
-                except OSError:
-                    logging.info(
-                        f"Port {self.host[1]} not available. Retrying...")
-                    time.sleep(1)
-                    continue
-                else:
-                    break
+
+            # While True loop
+            self.__bind(self.host)
 
             self.server.listen()
 
             message = ""
-            while not self.killed or message != "reset":
+            while not self.killed and message != "reset":
                 logging.debug("Waiting for a client")
                 self.client, addr = self.server.accept()
                 logging.info(f"Connected to {addr}")
 
-                while message != "reset" or message != "disconnect" or not self.killed:
+                while message != "reset" and message != "disconnect" and not self.killed:
                     msgcl = self.client.recv(1024)
-                    if not msgcl: break  # prevents infinite loop on disconnect
-                    
+                    if not msgcl:
+                        break  # prevents infinite loop on disconnect
+
                     message = msgcl.decode()
                     logging.info(f"Message from {addr}: {message}")
 
@@ -53,8 +46,9 @@ class Server():
 
                 logging.info(f"Client at {addr} disconnected.")
                 self.client.close()
-            self.__close()
-        self.__close()
+
+            logging.debug("Closing server.")
+            self.server.close()
 
     def __handle(self, message: str, addr: tuple):
         match message:
@@ -70,15 +64,25 @@ class Server():
                 logging.info(
                     f"Client at {addr} requested a reset.")
 
-    def __close(self):
+    def __bind(self, host: tuple):
+        while True:
+            try:
+                self.server.bind(host)
+                logging.debug(f"Socket bound to {host}")
+            except OSError:
+                logging.info(f"Port {host[1]} not available. Retrying...")
+                time.sleep(1)
+                continue
+            else:
+                break
+
+    def kill(self):
         try:
             self.client.send("kill".encode())
             self.client.close()
         except AttributeError:
-            pass  # client not
+            pass  # client not connected
         self.server.close()
-
-    def kill(self):
         self.killed = True
 
 

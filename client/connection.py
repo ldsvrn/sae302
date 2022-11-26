@@ -23,7 +23,7 @@ class Connection:
             client_handler.start()
 
             msgcl = ""
-            while msgcl != "disconnect" or msgcl != "kill" or self.msgsrv != "kill":
+            while msgcl != "disconnect" and msgcl != "kill" and self.msgsrv != "kill":
                 msgcl = input("Message:")
                 self.client.send(msgcl.encode())
             self.client.close()
