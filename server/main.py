@@ -1,62 +1,91 @@
 #!/usr/bin/env python3
 
-import threading
 import socket
 import logging
 import sys
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 
-# TODO: Detect IP?
 HOST = ("127.0.0.1", int(sys.argv[1]))
 
 
-class Server:
-    def __init__(self, host: tuple) -> None:
-        self.server = socket.socket()
-        self.server.bind(host)
-        self.server.listen()
+class Server():
+    def __init__(self, host: tuple):
+        self.host = host
 
-        self.clients = []
+    def start(self):
+        # self.killed to allow killing the server outside the class
+        self.killed = False
 
-        while True:
-            conn, addr = self.server.accept()
-            logging.info(f"Connected to {addr}")
-
-            thread = threading.Thread(target=self.handle, args=(conn, addr))
-            # keeping sockets and threads in a list of tuples
-            self.clients.append((addr, conn, thread))
-
-            thread.start()
-
-    def handle(self, client: socket.socket, addr: tuple) -> None:
-        # TODO: remove while true maybe
-        while True:
-            message = client.recv(1024)
-            if not message:
-                break  # prevents infinite loop on disconnect
-            message = message.decode()
-            logging.info(f"Message from {addr}: {message}")
-
-            match message:
-                case "dostuff":
-                    print("didstuff")
-                    client.send("didstuff".encode())
-
-                case "kill":
-                    logging.info(f"Kill requested by {addr}...")
-                    for i in self.clients:
-                        logging.info(f"Diconnecting {i[0]}...")
-                        i[1].close()
-
-                    logging.info("Closing server...")
-                    self.server.close()
-
-                case "disconnect":
-                    logging.info(f"Client at {addr} disconnected.")
-                    client.close()
+        while not self.killed:
+            self.server = socket.socket()
+            logging.debug("Created socket")
+            while True:
+                try:
+                    self.server.bind(self.host)
+                    logging.debug(f"Socket bound to {self.host}")
+                except OSError:
+                    logging.info(
+                        f"Port {self.host[1]} not available. Retrying...")
+                    time.sleep(1)
+                    continue
+                else:
                     break
+
+            self.server.listen()
+
+            message = ""
+            while not self.killed or message != "reset":
+                logging.debug("Waiting for a client")
+                self.client, addr = self.server.accept()
+                logging.info(f"Connected to {addr}")
+
+                while message != "reset" or message != "disconnect" or not self.killed:
+                    msgcl = self.client.recv(1024)
+                    if not msgcl: break  # prevents infinite loop on disconnect
+                    
+                    message = msgcl.decode()
+                    logging.info(f"Message from {addr}: {message}")
+
+                    self.__handle(message, addr)
+                    # Handle function for readability
+
+                logging.info(f"Client at {addr} disconnected.")
+                self.client.close()
+            self.__close()
+        self.__close()
+
+    def __handle(self, message: str, addr: tuple):
+        match message:
+            case "dostuff":
+                print("didstuff")
+                self.client.send("didstuff".encode())
+
+            case "kill":
+                logging.info(f"Kill requested by {addr}...")
+                self.killed = True  # avoid adding a condition to while loops
+
+            case "reset":
+                logging.info(
+                    f"Client at {addr} requested a reset.")
+
+    def __close(self):
+        try:
+            self.client.send("kill".encode())
+            self.client.close()
+        except AttributeError:
+            pass  # client not
+        self.server.close()
+
+    def kill(self):
+        self.killed = True
 
 
 if __name__ == "__main__":
-    Server(HOST)
+    server = Server(HOST)
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        logging.info("KeyboardInterrupt: killing server...")
+        server.kill()

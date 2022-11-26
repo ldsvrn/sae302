@@ -8,6 +8,8 @@ HOST = ("127.0.0.1", int(sys.argv[1]))
 class Connection:
     def __init__(self) -> None:
         self.client = socket.socket()
+        self.msgsrv = ""
+
         try:
             self.client.connect(HOST)
         except PermissionError:
@@ -21,22 +23,18 @@ class Connection:
             client_handler.start()
 
             msgcl = ""
-            while msgcl != "disconnect" and msgcl != "kill":
+            while msgcl != "disconnect" or msgcl != "kill" or self.msgsrv != "kill":
                 msgcl = input("Message:")
                 self.client.send(msgcl.encode())
             self.client.close()
 
     
     def handle(self, conn) -> None:
-        while True:
-            msgsrv = conn.recv(1024)
-            if not msgsrv: break # prevents infinite loop on disconnect
-            msgsrv = msgsrv.decode()
-            print(f"\nMessage du serveur: {msgsrv}")
-            match msgsrv:
-                case "kill":
-                    break
-        conn.close()
+        while self.msgsrv != "kill":
+            self.msgsrv = conn.recv(1024)
+            if not self.msgsrv: break # prevents infinite loop on disconnect
+            self.msgsrv = self.msgsrv.decode()
+            print(f"\nMessage du serveur: {self.msgsrv}")
 
 if __name__ == "__main__":
     conn= Connection()
