@@ -1,18 +1,20 @@
 # SAE-3.02
 ## Contexte
 
-A l’image du protocole SNMP, nous souhaitons réaliser un système client-serveur permettant
-d’envoyer des commandes systèmes permettant de superviser et de diagnostiquer des
-machines ou serveurs à distance.
+A l’image du protocole SNMP, nous souhaitons réaliser un système client-serveur
+permettant d’envoyer des commandes systèmes permettant de superviser et de
+diagnostiquer des machines ou serveurs à distance.
 
 ## Fonctionnalités
 
 Nous souhaitons une interface graphique permettant de réaliser l’ensemble des
-fonctionnalités suivantes. Sur la base d’un système client-serveur, vous devrez pouvoir
-interroger des serveurs sur leur état et leur fonctionnement et même détecter lorsqu’ils sont
-déconnectés du réseau. Nous souhaitons avoir une liste d’IP ou de noms de machines, sous la
-forme de fichier, interroger ces mêmes machines sur leur état.
-L’interface graphique permettra d’effectuer les commandes suivantes :
+fonctionnalités suivantes. Sur la base d’un système client-serveur, vous devrez
+pouvoir interroger des serveurs sur leur état et leur fonctionnement et même
+détecter lorsqu’ils sont déconnectés du réseau. 
+
+Nous souhaitons avoir une liste d’IP ou de noms de machines, sous la forme de
+fichier, interroger ces mêmes machines sur leur état. L’interface graphique
+permettra d’effectuer les commandes suivantes :
 
 -  Lire un fichier de machines (csv par exemple, avec un port par défaut par exemple)
 -  Pouvoir ajouter des machines et enregistrer ces nouvelles machines dans le fichier
@@ -25,13 +27,14 @@ L’interface graphique permettra d’effectuer les commandes suivantes :
     - IP : adresse IP
     - Name : nom de la machine
     - Envoyer des commandes aux serveurs de machines :
-    - Disconnect : déconnexion de l’interface permettant de libérer la machine
-      monitorée pour permettre de libérer le serveur pour d’autres requêtes
-    - Connexion information : IP, nom de la machine
-    - Kill : tue le serveur
-    - Reset : reset du serveur
+        - Disconnect : déconnexion de l’interface permettant de libérer la machine
+        monitorée pour permettre de libérer le serveur pour d’autres requêtes
+        - Connexion information : IP, nom de la machine
+        - Kill : tue le serveur
+        - Reset : reset du serveur
   
-- De plus, l’interface permettra d’envoyer des commandes données par l’utilisateur, par exemple :
+- De plus, l’interface permettra d’envoyer des commandes données par
+  l’utilisateur, par exemple :
  
     - DOS:dir
     - DOS:mkdir toto
@@ -57,7 +60,7 @@ Nous n’avons pas spécifiquement de prérequis sur l’interface mais elle se 
 d’être ergonomique et facile d’utilisation tant pour un administrateur système
 que pour un débutant averti sur l’administration système.
 
-### Points d’attention
+## Points d’attention
 
 Vous devrez bien sûr gérer l’ensemble des erreurs possibles et éviter tous les
 crashs de votre application.
@@ -70,9 +73,9 @@ nécessaire.
 
 - Un graphique sur l’utilisation de la CPU ou la mémoire.
 
-- Nous nous posons également la question sur une connexion sécurisée et chiffrée entre
-le client et le serveur, il serait intéressant de voir si sur le réseau les commandes
-peuvent apparaître à l’aide d’un outil tel que Wireshark. Si les commandes ne sont pas
-sécurisées, il serait donc intéressant de les sécuriser.
+- Nous nous posons également la question sur une connexion sécurisée et chiffrée
+entre le client et le serveur, il serait intéressant de voir si sur le réseau
+les commandes peuvent apparaître à l’aide d’un outil tel que Wireshark. Si les
+commandes ne sont pas sécurisées, il serait donc intéressant de les sécuriser.
 
 - Il serait possible d’ajouter plusieurs clients.
