@@ -32,7 +32,7 @@ L’interface graphique permettra d’effectuer les commandes suivantes :
   
   - Name : nom de la machine
   
- • Envoyer des commandes aux serveurs de machines :
+ - Envoyer des commandes aux serveurs de machines :
  
   - Disconnect : déconnexion de l’interface permettant de libérer la machine monitorée pour permettre de libérer le serveur pour d’autres requêtes
   
@@ -42,7 +42,7 @@ L’interface graphique permettra d’effectuer les commandes suivantes :
   
   - Reset : reset du serveur
   
- • De plus, l’interface permettra d’envoyer des commandes données par l’utilisateur, par exemple :
+ - De plus, l’interface permettra d’envoyer des commandes données par l’utilisateur, par exemple :
  
   1. DOS:dir
   
@@ -70,11 +70,11 @@ l’utilisateur de l’interface et sur un document du développement effectué 
 ajouter de nouvelles fonctionnalités (ou commandes) si nécessaire.
 ## Options supplémentaires (à réfléchir en fonction du temps)
 
-• Un graphique sur l’utilisation de la CPU ou la mémoire.
+- Un graphique sur l’utilisation de la CPU ou la mémoire.
 
-• Nous nous posons également la question sur une connexion sécurisée et chiffrée entre
+- Nous nous posons également la question sur une connexion sécurisée et chiffrée entre
 le client et le serveur, il serait intéressant de voir si sur le réseau les commandes
 peuvent apparaître à l’aide d’un outil tel que Wireshark. Si les commandes ne sont pas
 sécurisées, il serait donc intéressant de les sécuriser.
 
-• Il serait possible d’ajouter plusieurs clients.
+- Il serait possible d’ajouter plusieurs clients.
