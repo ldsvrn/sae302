@@ -24,6 +24,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(Tab(self))
         self.show()
 
+
 """
 https://pythonspot.com/pyqt5-tabs/
 """
@@ -36,10 +37,9 @@ class Tab(QWidget):
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
 
-
         # Create Tab Widget
         self.tabwidget = QTabWidget()
-        
+
         self.tabs = []
         # Add a bunch of tabs
         for i in range(10):
@@ -47,7 +47,7 @@ class Tab(QWidget):
             self.tabwidget.addTab(self.tabs[i], f"Tab {i}")
             self.tabs[i].layout = QGridLayout()
             self.tabs[i].setLayout(self.tabs[i].layout)
-    
+
         # # Create first tab
         # self.tab1.layout = QVBoxLayout(self)
         # self.pushButton1 = QPushButton("PyQt5 button")
@@ -59,7 +59,6 @@ class Tab(QWidget):
 
         # Add tabswidget to layout
         self.layout.addWidget(self.tabwidget)
-        
 
 
 if __name__ == "__main__":

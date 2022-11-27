@@ -1,3 +1,4 @@
+from .common import *
 import sys
 
 match sys.platform:
@@ -9,5 +10,3 @@ match sys.platform:
         from .osx import *
     case _:
         raise Exception("OS not supported.")
-
-from .common import *
