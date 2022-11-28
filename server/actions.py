@@ -1,5 +1,19 @@
 import psutil
 import platform
+import sys
+import os
+
+def reboot():
+    if sys.platform == "windows":
+        os.system("shutdown /r /t 0")
+    else:
+        os.system("reboot -h now")
+
+def shutdown():
+    if sys.platform == "windows":
+        os.system("shutdown /t 0")
+    else:
+        os.system("shutdown -h now")
 
 
 def get_cpu_usage():
@@ -29,11 +43,11 @@ def get_disk_usage():
 
 
 def get_os_info():
-    if platform.system() == 'Linux':
+    if sys.platform == 'linux':
         freedesktop = platform.freedesktop_os_release()
         return {
             'node': platform.node(),
-            'system': freedesktop['PRETTY_NAME'],
+            'system': f"{freedesktop['PRETTY_NAME']} (Linux)",
             'release': platform.release(),
         }
     else:
