@@ -41,6 +41,7 @@ class Tab(QWidget):
         self.tabwidget = QTabWidget()
 
         self.tabs = []
+        self.connections = []
         # Add a bunch of tabs
         for i in range(10):
             self.tabs.append(QWidget())
@@ -53,9 +54,8 @@ class Tab(QWidget):
         # self.pushButton1 = QPushButton("PyQt5 button")
         # self.tab1.layout.addWidget(self.pushButton1)
         # self.tab1.setLayout(self.tab1.layout)
-        self.tabs[0].layout.addWidget(QPushButton("Hello World!"), 0, 0)
-        self.tabs[0].layout.addWidget(QPushButton("Hello!"), 1, 1)
-        self.tabs[0].layout.addWidget(QPushButton("Test!"), 0, 3)
+        self.tabs[0].layout.addWidget(QPushButton("Get info."), 0, 0)
+
 
         # Add tabswidget to layout
         self.layout.addWidget(self.tabwidget)

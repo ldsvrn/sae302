@@ -67,8 +67,14 @@ class Server():
                 self.killed = True  # avoid adding a condition to while loops
 
             case "reset":
-                logging.info(
-                    f"Client at {addr} requested a reset.")
+                logging.info(f"Client at {addr} requested a reset.")
+
+            case "ram":
+                logging.info(f"Client at {addr} requested RAM usage.")
+                ram = actions.get_memory_usage()
+                self.client.send(
+                    json.dumps(ram).encode()
+                )
 
     """
     Retries to bind the socked every 10 seconds.

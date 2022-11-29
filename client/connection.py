@@ -12,10 +12,12 @@ HOST = "127.0.0.1"
 
 
 class Connection:
-    def __init__(self, host: str, port: int) -> None:
+    def __init__(self, host: str, port: int, label_info, label_command) -> None:
         self.client = socket.socket()
         self.msgsrv = ""
         self.addr = (host, port)
+        self.label_info = label_info
+        self.label_command = label_command
 
         self.__connect()
 
@@ -72,9 +74,10 @@ class Connection:
 
 if __name__ == "__main__":
     conn = Connection(HOST, int(sys.argv[1]))
-    conn2 = Connection(HOST, int(sys.argv[2]))
-    conn.send("test")
-    conn2.send("test2")
+    # conn2 = Connection(HOST, int(sys.argv[2]))
+    conn.send(sys.argv[2])
+    conn.reset()
+    # conn2.send("test2")
 
-    time.sleep(5)
-    conn2.send("test3")
+    # time.sleep(5)
+    # conn2.send("test3")

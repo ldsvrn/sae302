@@ -102,6 +102,7 @@ def get_ip():
         )
 
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
+# TODO: stderr is not returned, this is a problem when the command is not found
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
     if shell == "default" or shell == "dos":
@@ -116,6 +117,7 @@ def send_command(command: str, shell: str = "default"):
             .decode()
             .rstrip()
         )
+        # TODO:check if i need to use a list of args
     elif shell == "bash":
         return (
             subprocess.Popen(
@@ -140,6 +142,3 @@ def send_command(command: str, shell: str = "default"):
             .decode()
             .rstrip()
         )
-    elif shell == "dos":
-        pass
-    
