@@ -104,10 +104,10 @@ def get_ip():
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
-    if shell == "default":
+    if shell == "default" or shell == "dos":
         return (
             subprocess.Popen(
-                f"/bin/bash -c '{command}'",
+                command,
                 shell=True,
                 stdout=subprocess.PIPE,
             )
@@ -128,4 +128,18 @@ def send_command(command: str, shell: str = "default"):
             .decode()
             .rstrip()
         )
+    elif shell == "powershell":
+        return (
+            subprocess.Popen(
+                f"powershell.exe '{command}'",
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
+            # here it is a subprocess.CompletedProcess
+            .stdout.read()
+            .decode()
+            .rstrip()
+        )
+    elif shell == "dos":
+        pass
     
