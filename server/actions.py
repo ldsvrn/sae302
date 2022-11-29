@@ -3,6 +3,7 @@ import platform
 import sys
 import os
 import subprocess
+import shlex
 
 
 def reboot():
@@ -74,7 +75,7 @@ def get_ip():
             .rstrip()
             .split("\n")
         )
-    if sys.platform == "darwin":
+    elif sys.platform == "darwin":
         # IPs with broadcast address = local IPs i guess??
         return (
             subprocess.Popen(
@@ -87,3 +88,44 @@ def get_ip():
             .rstrip()
             .split("\n")
         )
+    elif sys.platform == "win32":
+        # TODO: parse ipconfig output
+        return (
+            subprocess.Popen(
+                "ipconfig",
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
+            .stdout.read()
+            .decode()
+            .rstrip()
+        )
+
+# check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
+def send_command(command: str, shell: str = "default"):
+    # this is kind of dangerous
+    if shell == "default":
+        return (
+            subprocess.Popen(
+                f"/bin/bash -c '{command}'",
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
+            # here it is a subprocess.CompletedProcess
+            .stdout.read()
+            .decode()
+            .rstrip()
+        )
+    elif shell == "bash":
+        return (
+            subprocess.Popen(
+                f"/bin/bash -c '{command}'",
+                shell=True,
+                stdout=subprocess.PIPE,
+            )
+            # here it is a subprocess.CompletedProcess
+            .stdout.read()
+            .decode()
+            .rstrip()
+        )
+    
