@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QMessageBox,
     QVBoxLayout,
-    QTabWidget
+    QTabWidget,
 )
 from PyQt5.QtCore import QCoreApplication
 
@@ -55,7 +55,6 @@ class Tab(QWidget):
         # self.tab1.layout.addWidget(self.pushButton1)
         # self.tab1.setLayout(self.tab1.layout)
         self.tabs[0].layout.addWidget(QPushButton("Get info."), 0, 0)
-
 
         # Add tabswidget to layout
         self.layout.addWidget(self.tabwidget)

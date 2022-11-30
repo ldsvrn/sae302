@@ -30,9 +30,10 @@ def get_memory_usage():
     dict = psutil.virtual_memory()._asdict()
 
     return {
-        "total": dict["total"],
-        "used": dict["used"],
-        "free": dict["free"],
+        "total": round(dict["total"] / 1_073_741_824, 2),
+        "used": round(dict["used"] / 1_073_741_824, 2),
+        # TODO: Il en manque tjs un peu... faire total - used?
+        "free": round((dict["available"] + dict["free"]) / 1_073_741_824, 2),
         "percent": dict["percent"],
     }
 
@@ -41,9 +42,9 @@ def get_disk_usage():
     dict = psutil.disk_usage("/")._asdict()
 
     return {
-        "total": dict["total"],
-        "used": dict["used"],
-        "free": dict["free"],
+        "total": round(dict["total"] / 1_073_741_824, 2),
+        "used": round(dict["used"] / 1_073_741_824, 2),
+        "free": round(dict["free"] / 1_073_741_824, 2),
         "percent": dict["percent"],
     }
 
@@ -65,14 +66,27 @@ def get_os_info():
 
 
 def get_ip():
-    ipaddresses = []    
+    ipaddresses = []
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
             address = addr.address
             # Ingore garbage addresses on Windows
             if addr.family == AF_INET and not address.startswith("169.254"):
-                ipaddresses.append(f"{address}/{IPv4Network('0.0.0.0/' +  addr.netmask).prefixlen}")
+                ipaddresses.append(
+                    f"{address}/{IPv4Network('0.0.0.0/' +  addr.netmask).prefixlen}"
+                )
     return ipaddresses
+
+
+def get_all():
+    return {
+        "os": get_os_info(),
+        "cpu": get_cpu_usage(),
+        "mem": get_memory_usage(),
+        "disk": get_disk_usage(),
+        "ip": get_ip(),
+    }
+
 
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
 # TODO: stderr is not returned, this is a problem when the command is not found
@@ -115,3 +129,7 @@ def send_command(command: str, shell: str = "default"):
             .decode()
             .rstrip()
         )
+
+
+if __name__ == "__main__":
+    print(get_all())

@@ -28,8 +28,7 @@ class Connection:
         # Flag to kill the handle thread
         self.__killed = False
         # Starting handle thread for incoming messages
-        client_handler = threading.Thread(
-            target=self.__handle, args=[self.client])
+        client_handler = threading.Thread(target=self.__handle, args=[self.client])
         client_handler.start()
 
     """
@@ -73,10 +72,10 @@ class Connection:
 
 
 if __name__ == "__main__":
-    conn = Connection(HOST, int(sys.argv[1]))
+    conn = Connection(HOST, int(sys.argv[1]), "pass", "pass")
     # conn2 = Connection(HOST, int(sys.argv[2]))
     conn.send(sys.argv[2])
-    conn.reset()
+    conn.disconnect()
     # conn2.send("test2")
 
     # time.sleep(5)

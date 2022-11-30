@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 HOST = ("127.0.0.1", int(sys.argv[1]))
 
 
-class Server():
+class Server:
     def __init__(self, host: tuple):
         self.host = host
 
@@ -36,7 +36,9 @@ class Server():
                 logging.info(f"Connected to {addr}")
 
                 message = ""  # reset so we can reconnect
-                while not self.killed and message != "reset" and message != "disconnect":
+                while (
+                    not self.killed and message != "reset" and message != "disconnect"
+                ):
                     msgcl = self.client.recv(1024)
                     if not msgcl:
                         break  # prevents infinite loop on disconnect
@@ -65,13 +67,9 @@ class Server():
             self.killed = True  # avoid adding a condition to while loops
         elif message == "reset":
             logging.info(f"Client at {addr} requested a reset.")
-        elif message == "ram":
-            logging.info(f"Client at {addr} requested RAM usage.")
-            ram = actions.get_memory_usage()
-            self.client.send(
-                json.dumps(ram).encode()
-            )
-            
+        elif message == "info":
+            logging.info(f"Client at {addr} system info.")
+            self.client.send(json.dumps(actions.get_all()).encode())
 
     """
     Retries to bind the socked every 10 seconds.
