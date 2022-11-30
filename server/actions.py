@@ -4,6 +4,8 @@ import sys
 import os
 import subprocess
 import shlex
+from socket import AF_INET
+from ipaddress import IPv4Network
 
 
 def reboot():
@@ -63,43 +65,14 @@ def get_os_info():
 
 
 def get_ip():
-    if sys.platform == "linux":
-        return (
-            subprocess.Popen(
-                "ip a | grep inet | grep global | awk '{print $2}'",
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
-            .stdout.read()
-            .decode()
-            .rstrip()
-            .split("\n")
-        )
-    elif sys.platform == "darwin":
-        # IPs with broadcast address = local IPs i guess??
-        return (
-            subprocess.Popen(
-                "ifconfig | grep inet | grep broadcast | awk '{print $2}'",
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
-            .stdout.read()
-            .decode()
-            .rstrip()
-            .split("\n")
-        )
-    elif sys.platform == "win32":
-        # TODO: parse ipconfig output
-        return (
-            subprocess.Popen(
-                "ipconfig",
-                shell=True,
-                stdout=subprocess.PIPE,
-            )
-            .stdout.read()
-            .decode()
-            .rstrip()
-        )
+    ipaddresses = []    
+    for nic, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            address = addr.address
+            # Ingore garbage addresses on Windows
+            if addr.family == AF_INET and not address.startswith("169.254"):
+                ipaddresses.append(f"{address}/{IPv4Network('0.0.0.0/' +  addr.netmask).prefixlen}")
+    return ipaddresses
 
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
 # TODO: stderr is not returned, this is a problem when the command is not found
