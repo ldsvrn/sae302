@@ -57,24 +57,21 @@ class Server():
     """
 
     def __handle(self, message: str, addr: tuple):
-        match message:
-            case "dostuff":
-                print("didstuff")
-                self.client.send("didstuff".encode())
-
-            case "kill":
-                logging.info(f"Kill requested by {addr}...")
-                self.killed = True  # avoid adding a condition to while loops
-
-            case "reset":
-                logging.info(f"Client at {addr} requested a reset.")
-
-            case "ram":
-                logging.info(f"Client at {addr} requested RAM usage.")
-                ram = actions.get_memory_usage()
-                self.client.send(
-                    json.dumps(ram).encode()
-                )
+        if message == "dostuff":
+            print("didstuff")
+            self.client.send("didstuff".encode())
+        elif message == "kill":
+            logging.info(f"Kill requested by {addr}...")
+            self.killed = True  # avoid adding a condition to while loops
+        elif message == "reset":
+            logging.info(f"Client at {addr} requested a reset.")
+        elif message == "ram":
+            logging.info(f"Client at {addr} requested RAM usage.")
+            ram = actions.get_memory_usage()
+            self.client.send(
+                json.dumps(ram).encode()
+            )
+            
 
     """
     Retries to bind the socked every 10 seconds.

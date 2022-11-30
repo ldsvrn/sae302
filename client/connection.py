@@ -41,7 +41,7 @@ class Connection:
         while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:
             self.msgsrv = conn.recv(1024)
             if not self.msgsrv:
-                break  # prevents infinite loop on disconnect
+                break  # prevents infinite loop on disconnect, auto disconnect clients
             self.msgsrv = self.msgsrv.decode()
             logging.debug(f"Message from {self.addr}: {self.msgsrv}")
         logging.debug(f"Closing handle thread for {self.addr}")
