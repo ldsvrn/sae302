@@ -18,8 +18,10 @@ class Connection:
         self.addr = (host, port)
         self.label_info = label_info
         self.label_command = label_command
+        self.info = {}
 
         self.__connect()
+        self.send("info")
 
     def __connect(self) -> None:
         # Handle errors in the GUI
@@ -43,6 +45,12 @@ class Connection:
                 break  # prevents infinite loop on disconnect, auto disconnect clients
             self.msgsrv = self.msgsrv.decode()
             logging.debug(f"Message from {self.addr}: {self.msgsrv}")
+
+            if self.msgsrv[:4] == "info":
+                self.info = json.loads(self.msgsrv[4:])
+                logging.debug("Got the server information.")
+                
+
         logging.debug(f"Closing handle thread for {self.addr}")
         self.__killed = True
 
@@ -50,6 +58,8 @@ class Connection:
         if not self.__killed:
             logging.debug(f"Sending message to {self.addr}: {message}")
             self.client.send(message.encode())
+        else:
+            logging.error(f"Tried to send '{message}' to {self.addr} while the connection is killed.")
 
     def reset(self) -> None:
         logging.debug(f"Resetting {self.addr}")
@@ -69,13 +79,26 @@ class Connection:
 
     def isKilled(self) -> bool:
         return self.__killed
+    
+    def execute_command(self, command: str, shell: str = "osef"):
+        com = {
+            "com": command,
+            "shell": shell
+        }
+        self.send("command" + json.dumps(com))
 
 
 if __name__ == "__main__":
     conn = Connection(HOST, int(sys.argv[1]), "pass", "pass")
     # conn2 = Connection(HOST, int(sys.argv[2]))
-    conn.send(sys.argv[2])
-    conn.disconnect()
+    for i in sys.argv[2:]:
+        # Let the server answer
+        time.sleep(1)
+        conn.send(i)
+    conn.execute_command("ls -lah", "linux")
+    time.sleep(1)
+    conn.execute_command("ls", "test")
+    # conn.disconnect()
     # conn2.send("test2")
 
     # time.sleep(5)

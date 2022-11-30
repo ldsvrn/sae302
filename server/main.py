@@ -15,11 +15,10 @@ HOST = ("127.0.0.1", int(sys.argv[1]))
 class Server:
     def __init__(self, host: tuple):
         self.host = host
-
-    def start(self):
         # self.killed to allow killing the server outside the class
         self.killed = False
 
+    def start(self):
         while not self.killed:
             self.server = socket.socket()
             logging.debug("Created socket")
@@ -45,7 +44,6 @@ class Server:
 
                     message = msgcl.decode()
                     logging.info(f"Message from {addr}: {message}")
-
                     self.__handle(message, addr)
 
                 logging.info(f"Client at {addr} disconnected.")
@@ -55,7 +53,10 @@ class Server:
             self.server.close()
 
     """
-    Handle function for readability
+    Handle function for readability 
+    
+    TODO: when messages are comming to fast, this function is not fast enough
+    and crashes the server
     """
 
     def __handle(self, message: str, addr: tuple):
@@ -69,7 +70,37 @@ class Server:
             logging.info(f"Client at {addr} requested a reset.")
         elif message == "info":
             logging.info(f"Client at {addr} system info.")
-            self.client.send(json.dumps(actions.get_all()).encode())
+            self.client.send(("info" + json.dumps(actions.get_all())).encode())
+        elif message[:7] == "command":
+            command = json.loads(message[7:])
+            logging.info(f"Executing {command}")
+            rep = ""
+            if command["shell"] == "dos":
+                if sys.platform == "win32":
+                    rep = actions.send_command(command["com"], "dos")
+                else:
+                    rep = "Cannot execute a DOS command on this operating system."
+                    logging.error(rep)
+            elif command["shell"] == "powershell":
+                if sys.platform == "win32":
+                    rep = actions.send_command(command["com"], "powershell")
+                else:
+                    rep = "Cannot execute a powershell command on this operating system."
+                    logging.error(rep)
+            elif command["shell"] == "linux":
+                if sys.platform == "linux":
+                    rep = actions.send_command(command["com"], "bash")
+                else:
+                    rep = "Cannot execute a linux command on this operating system."
+                    logging.error(rep)
+                    
+            elif command["shell"] == "osef":
+                rep = actions.send_command(command["com"])
+            else:
+                rep = f"Shell '{command['shell']}' is not recognised. Available values are: dos, powershell, linux"
+
+            # We send the output from commands
+            self.client.send(rep.encode())
 
     """
     Retries to bind the socked every 10 seconds.
