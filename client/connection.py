@@ -13,7 +13,9 @@ HOST = "127.0.0.1"
 
 
 class Connection:
-    def __init__(self, host: str, port: int, label_info: QLabel, label_command: QPlainTextEdit) -> None:
+    def __init__(
+        self, host: str, port: int, label_info: QLabel, label_command: QPlainTextEdit
+    ) -> None:
         self.client = socket.socket()
         self.msgsrv = ""
         self.addr = (host, port)
@@ -54,7 +56,6 @@ class Connection:
             elif self.msgsrv[:4] == "cmmd":
                 logging.debug("Got a command output from the server.")
                 self.label_command.setPlainText(self.msgsrv[4:])
-                
 
         logging.debug(f"Closing handle thread for {self.addr}")
         self.__killed = True
@@ -64,7 +65,9 @@ class Connection:
             logging.debug(f"Sending message to {self.addr}: {message}")
             self.client.send(message.encode())
         else:
-            logging.error(f"Tried to send '{message}' to {self.addr} while the connection is killed.")
+            logging.error(
+                f"Tried to send '{message}' to {self.addr} while the connection is killed."
+            )
 
     def reset(self) -> None:
         logging.debug(f"Resetting {self.addr}")
@@ -84,14 +87,12 @@ class Connection:
 
     def isKilled(self) -> bool:
         return self.__killed
-    
+
     def execute_command(self, command: str, shell: str = "osef"):
-        com = {
-            "com": command,
-            "shell": shell
-        }
+        com = {"com": command, "shell": shell}
         print(type(com))
         self.send("command" + json.dumps(com))
+
 
 if __name__ == "__main__":
     conn = Connection(HOST, int(sys.argv[1]), "pass", "pass")

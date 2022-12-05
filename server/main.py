@@ -85,7 +85,9 @@ class Server:
                 if sys.platform == "win32":
                     rep = actions.send_command(command["com"], "powershell")
                 else:
-                    rep = "Cannot execute a powershell command on this operating system."
+                    rep = (
+                        "Cannot execute a powershell command on this operating system."
+                    )
                     logging.error(rep)
             elif command["shell"] == "linux":
                 if sys.platform == "linux":
@@ -93,7 +95,7 @@ class Server:
                 else:
                     rep = "Cannot execute a linux command on this operating system."
                     logging.error(rep)
-                    
+
             elif command["shell"] == "osef":
                 rep = actions.send_command(command["com"])
             else:

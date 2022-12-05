@@ -21,6 +21,7 @@ from PyQt5.QtGui import QFont, QCloseEvent
 import connection
 import logging
 
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -34,7 +35,9 @@ class MainWindow(QMainWindow):
         if self.tab.tabs_open >= 1:
             box = QMessageBox()
             box.setWindowTitle("Quit ?")
-            box.setText("Do you really wish to quit? This will disconnect you from all servers.")
+            box.setText(
+                "Do you really wish to quit? This will disconnect you from all servers."
+            )
             box.addButton(QMessageBox.Yes)
             box.addButton(QMessageBox.No)
 
@@ -47,6 +50,7 @@ class MainWindow(QMainWindow):
                 _e.ignore()
         else:
             QCoreApplication.exit(0)
+
 
 """
 https://pythonspot.com/pyqt5-tabs/
@@ -76,11 +80,7 @@ class Tab(QWidget):
             with open("servers.csv", "r") as csvfile:
                 for row in csv.reader(csvfile):
                     self.servers.append(
-                        {
-                            "name": str(row[0]),
-                            "ip": str(row[1]),
-                            "port": int(row[2])
-                        }
+                        {"name": str(row[0]), "ip": str(row[1]), "port": int(row[2])}
                     )
         except Exception as e:
             logging.error(f"Error loading servers.csv, ignoring... ({e})")
@@ -126,7 +126,9 @@ culpa qui officia deserunt mollit anim id est laborum.
         tab = self.tabs[-1]
 
         # TODO: URGENT: try except here or the programme WILL crash if a wrong ip is given
-        tab["conn"] = connection.Connection(ip, port, tab["Label_info"], tab["LineEdit_resultcommand"])
+        tab["conn"] = connection.Connection(
+            ip, port, tab["Label_info"], tab["LineEdit_resultcommand"]
+        )
 
         self.tabwidget.addTab(tab["widget"], name)
 
@@ -147,7 +149,10 @@ culpa qui officia deserunt mollit anim id est laborum.
         tab["LineEdit_resultcommand"].setFont(self.monospace)
 
         # TODO: shell selection
-        tab["Button_sendcommand"].clicked.connect(lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text()))
+        # lambda function => args 
+        tab["Button_sendcommand"].clicked.connect(
+            lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text())
+        )
 
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
@@ -161,11 +166,11 @@ culpa qui officia deserunt mollit anim id est laborum.
         if len(self.tabs) > 0:
             for i in self.tabs:
                 i["conn"].disconnect()
-    
+
     @property
     def tabs_open(self) -> int:
         return len(self.tabs)
-    
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
