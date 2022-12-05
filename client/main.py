@@ -34,7 +34,7 @@ class Tab(QWidget):
     def __init__(self, parent: MainWindow) -> None:
         super(QWidget, self).__init__(parent)
         self.parent = parent
-        self.layout = QVBoxLayout(self)
+        self.layout = QGridLayout(self)
         self.setLayout(self.layout)
 
         # Create Tab Widget
@@ -49,15 +49,12 @@ class Tab(QWidget):
             self.tabs[i].layout = QGridLayout()
             self.tabs[i].setLayout(self.tabs[i].layout)
 
-        # # Create first tab
-        # self.tab1.layout = QVBoxLayout(self)
-        # self.pushButton1 = QPushButton("PyQt5 button")
-        # self.tab1.layout.addWidget(self.pushButton1)
-        # self.tab1.setLayout(self.tab1.layout)
-        self.tabs[0].layout.addWidget(QPushButton("Get info."), 0, 0)
+            self.tabs[i].layout.addWidget(QPushButton("Get info."), 0, 0)
 
         # Add tabswidget to layout
-        self.layout.addWidget(self.tabwidget)
+        self.layout.addWidget(QLineEdit(), 0, 0)
+        self.layout.addWidget(QPushButton("Connect"), 0, 1)
+        self.layout.addWidget(self.tabwidget, 1, 0, 1, 2)
 
 
 if __name__ == "__main__":
