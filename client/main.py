@@ -146,11 +146,17 @@ culpa qui officia deserunt mollit anim id est laborum.
 
         tab["LineEdit_resultcommand"].setFont(self.monospace)
 
+        # TODO: shell selection
+        tab["Button_sendcommand"].clicked.connect(lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text()))
+
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
         port = int(self.LineEdit_port.text())
         self._create_tab(ip, ip, port)
-    
+
+    def _send_command(self, conn: connection.Connection, command: str):
+        conn.execute_command(command)
+
     def disconnect_all(self):
         if len(self.tabs) > 0:
             for i in self.tabs:

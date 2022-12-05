@@ -51,6 +51,9 @@ class Connection:
                 self.info = json.loads(self.msgsrv[4:])
                 logging.debug("Got the server information.")
                 self.label_info.setText(f"OS: {self.info['os']['system']}")
+            elif self.msgsrv[:4] == "cmmd":
+                logging.debug("Got a command output from the server.")
+                self.label_command.setPlainText(self.msgsrv[4:])
                 
 
         logging.debug(f"Closing handle thread for {self.addr}")
@@ -87,8 +90,8 @@ class Connection:
             "com": command,
             "shell": shell
         }
+        print(type(com))
         self.send("command" + json.dumps(com))
-
 
 if __name__ == "__main__":
     conn = Connection(HOST, int(sys.argv[1]), "pass", "pass")

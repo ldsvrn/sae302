@@ -99,8 +99,8 @@ class Server:
             else:
                 rep = f"Shell '{command['shell']}' is not recognised. Available values are: dos, powershell, linux"
 
-            # We send the output from commands
-            self.client.send(rep.encode())
+            # We send the output from commands, ugly but works i guess
+            self.client.send(("cmmd" + rep).encode())
 
     """
     Retries to bind the socked every 10 seconds.
