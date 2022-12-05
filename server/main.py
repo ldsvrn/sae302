@@ -38,6 +38,7 @@ class Server:
                 while (
                     not self.killed and message != "reset" and message != "disconnect"
                 ):
+                # FIXME: ConnectionResetError: [Errno 104] Connection reset by peer
                     msgcl = self.client.recv(1024)
                     if not msgcl:
                         break  # prevents infinite loop on disconnect

@@ -56,7 +56,6 @@ class MainWindow(QMainWindow):
 https://pythonspot.com/pyqt5-tabs/
 """
 
-
 class Tab(QWidget):
     def __init__(self, parent: MainWindow) -> None:
         super(QWidget, self).__init__(parent)
@@ -149,7 +148,7 @@ culpa qui officia deserunt mollit anim id est laborum.
         tab["LineEdit_resultcommand"].setFont(self.monospace)
 
         # TODO: shell selection
-        # lambda function => args 
+        # FIXME FIXME FIXME: Segementation Fault AAHHHHHHHH
         tab["Button_sendcommand"].clicked.connect(
             lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text())
         )
