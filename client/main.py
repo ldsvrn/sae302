@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QFont
-
+import connection
 
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
@@ -49,11 +49,24 @@ class Tab(QWidget):
         self.monospace.setStyleHint(QFont.StyleHint.Courier)
 
         self.tabs = []
-        self.connections = []
+        self.servers = []
         # Add a bunch of tabs
+
+        # TODO: try except 
+        with open("servers.csv", "r") as csvfile:
+            for row in csv.reader(csvfile):
+                self.servers.append(
+                    {
+                        "name": str(row[0]),
+                        "ip": str(row[1]),
+                        "port": int(row[2])
+                    }
+                )
         
-        for i in range(10):
-            self._create_tab(str(i))
+        print(self.servers)
+
+        for conn in self.servers:
+            self._create_tab(conn["name"], conn["ip"], conn["port"])
 
         LineEdit_addr = QLineEdit("IP")
         LineEdit_port = QLineEdit("Port")
@@ -64,7 +77,7 @@ class Tab(QWidget):
         self.layout.addWidget(Button_conn, 0, 2)
         self.layout.addWidget(self.tabwidget, 1, 0, 1, 3)
 
-    def _create_tab(self, name: str):
+    def _create_tab(self, name: str, ip: str, port: int):
         self.tabs.append(
             {
                 "widget": QWidget(),
@@ -87,29 +100,27 @@ culpa qui officia deserunt mollit anim id est laborum.
                 ),
             }
         )
-        self.tabwidget.addTab(self.tabs[-1]["widget"], name)
+        tab = self.tabs[-1]
+
+        tab["conn"] = connection.Connection(ip, port, tab["Label_info"], tab["LineEdit_resultcommand"])
+
+        self.tabwidget.addTab(tab["widget"], name)
 
         # Set the layout
-        self.tabs[-1]["widget"].layout = QGridLayout()
-        self.tabs[-1]["widget"].setLayout(self.tabs[-1]["widget"].layout)
+        tab["widget"].layout = QGridLayout()
+        tab["widget"].setLayout(tab["widget"].layout)
 
         ### FIRST COL
-        self.tabs[-1]["widget"].layout.addWidget(self.tabs[-1]["Button_info"], 0, 0)
-        self.tabs[-1]["widget"].layout.addWidget(self.tabs[-1]["Label_info"], 1, 0, 3, 1)
+        tab["widget"].layout.addWidget(tab["Button_info"], 0, 0)
+        tab["widget"].layout.addWidget(tab["Label_info"], 1, 0, 3, 1)
 
         ### SECOND COL
-        self.tabs[-1]["widget"].layout.addWidget(self.tabs[-1]["ComboBox_shell"], 0, 1)
-        self.tabs[-1]["widget"].layout.addWidget(
-            self.tabs[-1]["LineEdit_sendcommand"], 0, 2
-        )
-        self.tabs[-1]["widget"].layout.addWidget(
-            self.tabs[-1]["Button_sendcommand"], 0, 3
-        )
-        self.tabs[-1]["widget"].layout.addWidget(
-            self.tabs[-1]["LineEdit_resultcommand"], 1, 1, 3, 3
-        )
+        tab["widget"].layout.addWidget(tab["ComboBox_shell"], 0, 1)
+        tab["widget"].layout.addWidget(tab["LineEdit_sendcommand"], 0, 2)
+        tab["widget"].layout.addWidget(tab["Button_sendcommand"], 0, 3)
+        tab["widget"].layout.addWidget(tab["LineEdit_resultcommand"], 1, 1, 3, 3)
 
-        self.tabs[-1]["LineEdit_resultcommand"].setFont(self.monospace)
+        tab["LineEdit_resultcommand"].setFont(self.monospace)
 
 
 if __name__ == "__main__":

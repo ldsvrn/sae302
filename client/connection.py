@@ -5,6 +5,7 @@ import sys
 import logging
 import time
 import json
+from PyQt5.QtWidgets import QLabel, QPlainTextEdit
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -12,7 +13,7 @@ HOST = "127.0.0.1"
 
 
 class Connection:
-    def __init__(self, host: str, port: int, label_info, label_command) -> None:
+    def __init__(self, host: str, port: int, label_info: QLabel, label_command: QPlainTextEdit) -> None:
         self.client = socket.socket()
         self.msgsrv = ""
         self.addr = (host, port)
@@ -49,6 +50,7 @@ class Connection:
             if self.msgsrv[:4] == "info":
                 self.info = json.loads(self.msgsrv[4:])
                 logging.debug("Got the server information.")
+                self.label_info.setText(f"OS: {self.info['os']['system']}")
                 
 
         logging.debug(f"Closing handle thread for {self.addr}")
