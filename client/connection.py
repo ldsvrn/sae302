@@ -1,27 +1,23 @@
 #!/usr/bin/env python3
 import threading
 import socket
-import sys
 import logging
 import time
 import json
-from PyQt5.QtWidgets import QLabel, QPlainTextEdit
-
-logging.basicConfig(level=logging.DEBUG)
-
-HOST = "127.0.0.1"
+from PyQt5.QtWidgets import QLabel, QTextBrowser
 
 
 class Connection:
     def __init__(
-        self, host: str, port: int, label_info: QLabel, label_command: QPlainTextEdit
+        self, host: str, port: int, label_info: QLabel, label_command: QTextBrowser
     ) -> None:
         self.client = socket.socket()
         self.msgsrv = ""
         self.addr = (host, port)
+        self.info = {}
+
         self.label_info = label_info
         self.label_command = label_command
-        self.info = {}
 
         self.__connect()
         self.send("info")
@@ -43,7 +39,7 @@ class Connection:
 
     def __handle(self, conn) -> None:
         while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:
-            self.msgsrv = conn.recv(1024)
+            self.msgsrv = conn.recv(2048)
             if not self.msgsrv:
                 break  # prevents infinite loop on disconnect, auto disconnect clients
             self.msgsrv = self.msgsrv.decode()
@@ -52,13 +48,23 @@ class Connection:
             if self.msgsrv[:4] == "info":
                 self.info = json.loads(self.msgsrv[4:])
                 logging.debug("Got the server information.")
-                self.label_info.setText(f"OS: {self.info['os']['system']}")
+                self.label_info.setText(self._info_string())
             elif self.msgsrv[:4] == "cmmd":
                 logging.debug("Got a command output from the server.")
-                self.label_command.setPlainText(self.msgsrv[4:])
+                self.label_command.append(self.msgsrv[4:])
 
         logging.debug(f"Closing handle thread for {self.addr}")
         self.__killed = True
+    
+    def _info_string(self) -> str:
+        ip = '\n'.join([str(x) for x in self.info["ip"]])
+        return f"""
+- Nom: {self.info['os']['node']}
+- OS: {self.info['os']['system']}
+- Version: {self.info['os']['release']}
+- IPs:
+{ip}
+        """
 
     def send(self, message: str) -> None:
         if not self.__killed:
@@ -90,11 +96,13 @@ class Connection:
 
     def execute_command(self, command: str, shell: str = "osef"):
         com = {"com": command, "shell": shell}
-        print(type(com))
         self.send("command" + json.dumps(com))
 
 
 if __name__ == "__main__":
+    import sys
+    HOST = "127.0.0.1"
+
     conn = Connection(HOST, int(sys.argv[1]), "pass", "pass")
     # conn2 = Connection(HOST, int(sys.argv[2]))
     for i in sys.argv[2:]:

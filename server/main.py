@@ -38,14 +38,16 @@ class Server:
                 while (
                     not self.killed and message != "reset" and message != "disconnect"
                 ):
-                # FIXME: ConnectionResetError: [Errno 104] Connection reset by peer
-                    msgcl = self.client.recv(1024)
-                    if not msgcl:
-                        break  # prevents infinite loop on disconnect
-
-                    message = msgcl.decode()
-                    logging.info(f"Message from {addr}: {message}")
-                    self.__handle(message, addr)
+                    try:
+                        msgcl = self.client.recv(1024)
+                        if not msgcl:
+                            break  # prevents infinite loop on disconnect
+                    except ConnectionResetError:
+                        break
+                    else:
+                        message = msgcl.decode()
+                        logging.info(f"Message from {addr}: {message}")
+                        self.__handle(message, addr)
 
                 logging.info(f"Client at {addr} disconnected.")
                 self.client.close()
@@ -103,6 +105,7 @@ class Server:
                 rep = f"Shell '{command['shell']}' is not recognised. Available values are: dos, powershell, linux"
 
             # We send the output from commands, ugly but works i guess
+            # FIXME: Client recieve only a small part of the output
             self.client.send(("cmmd" + rep).encode())
 
     """

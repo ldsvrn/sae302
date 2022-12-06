@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import csv
+import logging
+
+import connection
 
 from PyQt5.QtWidgets import (
     QApplication,
@@ -12,14 +15,18 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QComboBox,
     QMessageBox,
-    QVBoxLayout,
     QTabWidget,
-    QPlainTextEdit,
+    QTextBrowser,
 )
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QFont, QCloseEvent
-import connection
-import logging
+
+DEBUG = True
+
+if DEBUG:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.WARNING)
 
 
 class MainWindow(QMainWindow):
@@ -33,15 +40,18 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, _e: QCloseEvent):
         if self.tab.tabs_open >= 1:
-            box = QMessageBox()
-            box.setWindowTitle("Quit ?")
-            box.setText(
-                "Do you really wish to quit? This will disconnect you from all servers."
-            )
-            box.addButton(QMessageBox.Yes)
-            box.addButton(QMessageBox.No)
+            if not DEBUG:
+                box = QMessageBox()
+                box.setWindowTitle("Quit ?")
+                box.setText(
+                    "Do you really wish to quit? This will disconnect you from all servers."
+                )
+                box.addButton(QMessageBox.Yes)
+                box.addButton(QMessageBox.No)
 
-            ret = box.exec()
+                ret = box.exec()
+            else:
+                ret = QMessageBox.Yes
 
             if ret == QMessageBox.Yes:
                 self.tab.disconnect_all()
@@ -51,10 +61,6 @@ class MainWindow(QMainWindow):
         else:
             QCoreApplication.exit(0)
 
-
-"""
-https://pythonspot.com/pyqt5-tabs/
-"""
 
 class Tab(QWidget):
     def __init__(self, parent: MainWindow) -> None:
@@ -68,7 +74,7 @@ class Tab(QWidget):
 
         # FIXME: WHY DOES IT NOT WORK AAAAAAAAAAAAAAAAAAAAAA
         self.monospace = QFont()
-        self.monospace.setStyleHint(QFont.StyleHint.Courier)
+        self.monospace.setStyleHint(QFont.StyleHint.Monospace)
 
         self.tabs = []
         self.servers = []
@@ -82,7 +88,7 @@ class Tab(QWidget):
                         {"name": str(row[0]), "ip": str(row[1]), "port": int(row[2])}
                     )
         except Exception as e:
-            logging.error(f"Error loading servers.csv, ignoring... ({e})")
+            logging.warning(f"Error loading servers.csv, ignoring... ({e})")
             pass
         else:
             for conn in self.servers:
@@ -109,24 +115,19 @@ class Tab(QWidget):
                 ),
                 "ComboBox_shell": QComboBox(),
                 "LineEdit_sendcommand": QLineEdit("Send a command..."),
-                "Button_sendcommand": QPushButton("Send"),
-                "LineEdit_resultcommand": QPlainTextEdit(
-                    """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-culpa qui officia deserunt mollit anim id est laborum.
-                """
-                ),
+                "Button_clear": QPushButton("Clear"),
+                "TextBrowser_resultcommand": QTextBrowser(),
             }
         )
         tab = self.tabs[-1]
 
         # TODO: URGENT: try except here or the programme WILL crash if a wrong ip is given
+
+        # FIXME: just crashes the client with no traceback, maybe
+        # create a classmethod in connection to check if the server is available
+        # before attempting a connection in _connect_Clicked
         tab["conn"] = connection.Connection(
-            ip, port, tab["Label_info"], tab["LineEdit_resultcommand"]
+            ip, port, tab["Label_info"], tab["TextBrowser_resultcommand"]
         )
 
         self.tabwidget.addTab(tab["widget"], name)
@@ -140,18 +141,26 @@ culpa qui officia deserunt mollit anim id est laborum.
         tab["widget"].layout.addWidget(tab["Label_info"], 1, 0, 3, 1)
 
         ### SECOND COL
-        tab["widget"].layout.addWidget(tab["ComboBox_shell"], 0, 1)
-        tab["widget"].layout.addWidget(tab["LineEdit_sendcommand"], 0, 2)
-        tab["widget"].layout.addWidget(tab["Button_sendcommand"], 0, 3)
-        tab["widget"].layout.addWidget(tab["LineEdit_resultcommand"], 1, 1, 3, 3)
+        tab["widget"].layout.addWidget(tab["ComboBox_shell"], 3, 1)
+        tab["widget"].layout.addWidget(tab["LineEdit_sendcommand"], 3, 2)
+        tab["widget"].layout.addWidget(tab["Button_clear"], 3, 3)
+        tab["widget"].layout.addWidget(tab["TextBrowser_resultcommand"], 0, 1, 3, 3)
 
-        tab["LineEdit_resultcommand"].setFont(self.monospace)
+        # TODO: try this on windows to check if "monospace" works
+        tab["TextBrowser_resultcommand"].setFont(QFont("monospace"))
+        tab["TextBrowser_resultcommand"].setAcceptRichText(True)
+        tab["TextBrowser_resultcommand"].setOpenExternalLinks(True)
 
-        # TODO: shell selection
-        # FIXME FIXME FIXME: Segementation Fault AAHHHHHHHH
-        tab["Button_sendcommand"].clicked.connect(
+        # TODO: shell selection (combobox)
+        tab["LineEdit_sendcommand"].returnPressed.connect(
             lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text())
         )
+
+        tab["Button_clear"].clicked.connect(
+            lambda: tab["TextBrowser_resultcommand"].clear()
+        )
+
+        tab["Button_info"].clicked.connect(lambda: tab["conn"].send("info"))
 
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
