@@ -17,6 +17,7 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QTabWidget,
     QTextBrowser,
+    QHBoxLayout
 )
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QFont, QCloseEvent
@@ -109,6 +110,8 @@ class Tab(QWidget):
         self.tabs.append(
             {
                 "widget": QWidget(),
+                "widget_left": QWidget(),
+                "widget_right": QWidget(),
                 "Button_info": QPushButton("Get info."),
                 "Label_info": QLabel(
                     "Placeholder\nPlaceholder\nPlaceholder\nPlaceholder\nPlaceholder"
@@ -132,19 +135,27 @@ class Tab(QWidget):
 
         self.tabwidget.addTab(tab["widget"], name)
 
-        # Set the layout
-        tab["widget"].layout = QGridLayout()
+        # CREATE LAYOUTS
+        tab["widget"].layout = QHBoxLayout()
+        tab["widget_left"].layout = QGridLayout()
+        tab["widget_right"].layout = QGridLayout()
+
         tab["widget"].setLayout(tab["widget"].layout)
+        tab["widget_left"].setLayout(tab["widget_left"].layout)
+        tab["widget_right"].setLayout(tab["widget_right"].layout)
 
-        ### FIRST COL
-        tab["widget"].layout.addWidget(tab["Button_info"], 0, 0)
-        tab["widget"].layout.addWidget(tab["Label_info"], 1, 0, 3, 1)
+        tab["widget"].layout.addWidget(tab["widget_left"])
+        tab["widget"].layout.addWidget(tab["widget_right"])
 
-        ### SECOND COL
-        tab["widget"].layout.addWidget(tab["ComboBox_shell"], 3, 1)
-        tab["widget"].layout.addWidget(tab["LineEdit_sendcommand"], 3, 2)
-        tab["widget"].layout.addWidget(tab["Button_clear"], 3, 3)
-        tab["widget"].layout.addWidget(tab["TextBrowser_resultcommand"], 0, 1, 3, 3)
+        ### widget_left
+        tab["widget_left"].layout.addWidget(tab["Button_info"], 0, 0)
+        tab["widget_left"].layout.addWidget(tab["Label_info"], 1, 0)
+
+        ### widget_right
+        tab["widget_right"].layout.addWidget(tab["ComboBox_shell"], 3, 1)
+        tab["widget_right"].layout.addWidget(tab["LineEdit_sendcommand"], 3, 2)
+        tab["widget_right"].layout.addWidget(tab["Button_clear"], 3, 3)
+        tab["widget_right"].layout.addWidget(tab["TextBrowser_resultcommand"], 0, 1, 3, 3)
 
         # TODO: try this on windows to check if "monospace" works
         tab["TextBrowser_resultcommand"].setFont(QFont("monospace"))
