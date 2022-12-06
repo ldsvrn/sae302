@@ -32,10 +32,6 @@ class Connection:
         client_handler = threading.Thread(target=self.__handle, args=[self.client])
         client_handler.start()
 
-    """
-    TODO: Le thread se ferme tout seul quand le serveur est fermé??? Essayer de
-    comprendre pourquoi... Arpès ça m'arrange mais bon
-    """
 
     def __handle(self, conn) -> None:
         while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:

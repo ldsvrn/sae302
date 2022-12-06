@@ -147,15 +147,16 @@ class Tab(QWidget):
         tab["widget"].layout.addWidget(tab["widget_left"])
         tab["widget"].layout.addWidget(tab["widget_right"])
 
+        # row: int, column: int, rowSpan: int, columnSpan: int
         ### widget_left
         tab["widget_left"].layout.addWidget(tab["Button_info"], 0, 0)
         tab["widget_left"].layout.addWidget(tab["Label_info"], 1, 0)
 
         ### widget_right
-        tab["widget_right"].layout.addWidget(tab["ComboBox_shell"], 3, 1)
-        tab["widget_right"].layout.addWidget(tab["LineEdit_sendcommand"], 3, 2)
-        tab["widget_right"].layout.addWidget(tab["Button_clear"], 3, 3)
-        tab["widget_right"].layout.addWidget(tab["TextBrowser_resultcommand"], 0, 1, 3, 3)
+        tab["widget_right"].layout.addWidget(tab["ComboBox_shell"], 3, 0)
+        tab["widget_right"].layout.addWidget(tab["LineEdit_sendcommand"], 3, 1)
+        tab["widget_right"].layout.addWidget(tab["Button_clear"], 3, 2)
+        tab["widget_right"].layout.addWidget(tab["TextBrowser_resultcommand"], 0, 0, 3, 3)
 
         # TODO: try this on windows to check if "monospace" works
         tab["TextBrowser_resultcommand"].setFont(QFont("monospace"))
