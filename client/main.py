@@ -122,6 +122,7 @@ class Tab(QWidget):
                 "Button_disconnect": QPushButton("Disconnect"),
                 "Button_kill": QPushButton("Kill"),
                 "Button_reset": QPushButton("Reset"),
+                "Button_reco": QPushButton("Reconnect")
             }
         )
         tab = self.tabs[-1]
@@ -151,12 +152,14 @@ class Tab(QWidget):
 
         # row: int, column: int, rowSpan: int, columnSpan: int
         ### widget_left
-        tab["widget_left"].layout.addWidget(tab["Button_info"], 1, 0, 1, 3)
-        tab["widget_left"].layout.addWidget(tab["Label_info"], 2, 0, 1, 3)
+        tab["widget_left"].layout.addWidget(tab["Button_reco"], 1, 0, 1, 3)
+        tab["widget_left"].layout.addWidget(tab["Button_info"], 2, 0, 1, 3)
+        tab["widget_left"].layout.addWidget(tab["Label_info"], 3, 0, 1, 3)
         # action buttons
         tab["widget_left"].layout.addWidget(tab["Button_disconnect"], 0, 0)
         tab["widget_left"].layout.addWidget(tab["Button_kill"], 0, 1)
         tab["widget_left"].layout.addWidget(tab["Button_reset"], 0, 2)
+        tab["Button_reco"].setEnabled(False)
 
         ### widget_right
         tab["widget_right"].layout.addWidget(tab["TextBrowser_resultcommand"], 1, 0, 3, 3)
@@ -180,6 +183,14 @@ class Tab(QWidget):
         )
 
         tab["Button_info"].clicked.connect(lambda: tab["conn"].send("info"))
+        
+        # FIXME: Broken Pipe if trying to disconnect from an already disconnected server
+        # 
+        tab["Button_disconnect"].clicked.connect(lambda: self.disconnect(tab, "disconnect"))
+        tab["Button_kill"].clicked.connect(lambda: self.disconnect(tab, "kill"))
+        tab["Button_reset"].clicked.connect(lambda: self.disconnect(tab, "reset"))
+
+        tab["Button_reco"].clicked.connect(lambda: self.reco(tab))
 
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
@@ -194,8 +205,27 @@ class Tab(QWidget):
             for i in self.tabs:
                 i["conn"].disconnect()
 
-    def disconnect(self):
-        pass
+    def disconnect(self, tab: dict, action: str):
+        if action == "disconnect":
+            tab["conn"].disconnect()
+        elif action == "reset":
+            tab["conn"].reset()
+        elif action == "kill":
+            tab["conn"].kill()
+        tab["Button_reco"].setEnabled(True)
+        tab["Button_disconnect"].setEnabled(False)
+        tab["Button_kill"].setEnabled(False)
+        tab["Button_reset"].setEnabled(False)
+        tab["Button_info"].setEnabled(False)
+    
+    def reco(self, tab):
+        tab["conn"].reconnect()
+        tab["Button_reco"].setEnabled(False)
+        tab["Button_disconnect"].setEnabled(True)
+        tab["Button_kill"].setEnabled(True)
+        tab["Button_reset"].setEnabled(True)
+        tab["Button_info"].setEnabled(True)
+        
 
     @property
     def tabs_open(self) -> int:

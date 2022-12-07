@@ -62,13 +62,17 @@ class Connection:
 {ip}
 - CPU: {self.info['cpu']}%
 - RAM: {self.info["mem"]["used"]}GB/{self.info["mem"]["total"]}GB ({self.info["mem"]["percent"]}%) 
-- Disk: {self.info["disk"]["used"]}GB/{self.info["disk"]["total"]}GB ({self.info["mem"]["percent"]}%) 
+- Disk: {self.info["disk"]["used"]}GB/{self.info["disk"]["total"]}GB ({round(100 - self.info["mem"]["percent"], 2)}%) 
         """
 
     def send(self, message: str) -> None:
         if not self.__killed:
-            logging.debug(f"Sending message to {self.addr}: {message}")
-            self.client.send(message.encode())
+            try:
+                logging.debug(f"Sending message to {self.addr}: {message}")
+                self.client.send(message.encode())
+            except Exception as e:
+                logging.error(f"Sending failed! ({e})")
+                self.__killed = True
         else:
             logging.error(
                 f"Tried to send '{message}' to {self.addr} while the connection is killed."
@@ -96,6 +100,11 @@ class Connection:
     def execute_command(self, command: str, shell: str = "osef"):
         com = {"com": command, "shell": shell}
         self.send("command" + json.dumps(com))
+
+    def reconnect(self):
+        if self.__killed:
+            self.client = socket.socket()
+            self.__connect()
 
 
 if __name__ == "__main__":

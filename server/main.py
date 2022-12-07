@@ -9,7 +9,7 @@ import json
 
 logging.basicConfig(level=logging.DEBUG)
 
-HOST = ("0.0.0.0", int(sys.argv[1]))
+HOST = ("127.0.0.1", int(sys.argv[1]))
 
 
 class Server:
