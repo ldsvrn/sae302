@@ -60,6 +60,9 @@ class Connection:
 - Version: {self.info['os']['release']}
 - IPs:
 {ip}
+- CPU: {self.info['cpu']}%
+- RAM: {self.info["mem"]["used"]}GB/{self.info["mem"]["total"]}GB ({self.info["mem"]["percent"]}%) 
+- Disk: {self.info["disk"]["used"]}GB/{self.info["disk"]["total"]}GB ({self.info["mem"]["percent"]}%) 
         """
 
     def send(self, message: str) -> None:
