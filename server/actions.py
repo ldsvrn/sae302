@@ -92,7 +92,19 @@ def get_all():
 # FIXME: stderr is not returned, this is a problem when the command is not found
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
-    if shell == "default" or shell == "dos":
+    if shell == "default" and sys.platform == "win32":
+        return (
+            subprocess.Popen(
+                command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                encoding="cp850",
+            )
+            # here it is a subprocess.CompletedProcess
+            .stdout.read()
+            .rstrip()
+        )
+    elif shell == "default" and sys.platform in ("linux", "darwin"):
         return (
             subprocess.Popen(
                 command,
