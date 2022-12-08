@@ -26,7 +26,7 @@ class Server:
             # While True loop
             self.__bind(self.host)
 
-            self.server.listen()
+            self.server.listen(1)
 
             message = ""
             while not self.killed and message != "reset":

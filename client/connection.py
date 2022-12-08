@@ -106,6 +106,19 @@ class Connection:
             self.client = socket.socket()
             self.__connect()
 
+    # maybe i'll find another way but this is the easiest method i could think of 
+    @classmethod
+    def is_server_up(cls, ip: str, port: int) -> str:
+        sock = socket.socket()
+        try:
+            sock.connect((ip, port))
+        except Exception as e:
+            ret = str(e)
+        else:
+            ret = "ok"
+        sock.close()
+        del sock
+        return ret
 
 if __name__ == "__main__":
     import sys

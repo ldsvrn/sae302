@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QTextBrowser,
     QHBoxLayout,
+    QMessageBox,
 )
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QFont, QCloseEvent
@@ -92,7 +93,11 @@ class Tab(QWidget):
             pass
         else:
             for conn in self.servers:
-                self._create_tab(conn["name"], conn["ip"], conn["port"])
+                try:
+                    self._create_tab(conn["name"], conn["ip"], conn["port"])
+                except Exception as e:
+                    self.error_box(e, f"Connection to {conn['name']}, {conn['ip']}:{conn['port']}!")
+
 
         self.LineEdit_addr = QLineEdit("IP")
         self.LineEdit_port = QLineEdit("Port")
@@ -116,7 +121,7 @@ class Tab(QWidget):
                     "Placeholder\nPlaceholder\nPlaceholder\nPlaceholder\nPlaceholder"
                 ),
                 "ComboBox_shell": QComboBox(),
-                "LineEdit_sendcommand": QLineEdit("Send a command..."),
+                "LineEdit_sendcommand": QLineEdit(),
                 "Button_clear": QPushButton("Clear"),
                 "TextBrowser_resultcommand": QTextBrowser(),
                 "Button_disconnect": QPushButton("Disconnect"),
@@ -173,9 +178,11 @@ class Tab(QWidget):
         tab["TextBrowser_resultcommand"].setAcceptRichText(True)
         tab["TextBrowser_resultcommand"].setOpenExternalLinks(True)
 
+        tab["ComboBox_shell"].addItems(["default", "dos", "powershell", "linux"])
+
         # TODO: shell selection (combobox)
         tab["LineEdit_sendcommand"].returnPressed.connect(
-            lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"].text())
+            lambda: self._send_command(tab["conn"], tab["LineEdit_sendcommand"], tab["ComboBox_shell"])
         )
 
         tab["Button_clear"].clicked.connect(
@@ -184,7 +191,7 @@ class Tab(QWidget):
 
         tab["Button_info"].clicked.connect(lambda: tab["conn"].send("info"))
         
-        # FIXME: Broken Pipe if trying to disconnect from an already disconnected server
+        # FIXME: Broken Pipe if trying to disconenect from an already disconnected server
         # 
         tab["Button_disconnect"].clicked.connect(lambda: self.disconnect(tab, "disconnect"))
         tab["Button_kill"].clicked.connect(lambda: self.disconnect(tab, "kill"))
@@ -195,10 +202,26 @@ class Tab(QWidget):
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
         port = int(self.LineEdit_port.text())
-        self._create_tab(ip, ip, port)
+        state = connection.Connection.is_server_up(ip, port)
+        if connection.Connection.is_server_up(ip, port) == "ok":
+            self._create_tab(ip, ip, port)
+        else:
+            self.error_box(state, "Connection failed!")
 
-    def _send_command(self, conn: connection.Connection, command: str):
-        conn.execute_command(command)
+    # FIXME: interactive commands make this all fall apart
+    def _send_command(self, conn: connection.Connection, lineedit: QLineEdit, combobox: QComboBox):
+        # TODO: select shell with combobox
+        # ["default", "dos", "powershell", "linux"]
+        idx = combobox.currentIndex()
+        if idx == 0:
+            conn.execute_command(lineedit.text())
+        elif idx == 1:
+            conn.execute_command(lineedit.text(), "dos")
+        elif idx == 2:
+            conn.execute_command(lineedit.text(), "powershell")
+        elif idx == 3:
+            conn.execute_command(lineedit.text(), "linux")
+        lineedit.setText("")
 
     def disconnect_all(self):
         if len(self.tabs) > 0:
@@ -219,13 +242,22 @@ class Tab(QWidget):
         tab["Button_info"].setEnabled(False)
     
     def reco(self, tab):
-        tab["conn"].reconnect()
-        tab["Button_reco"].setEnabled(False)
-        tab["Button_disconnect"].setEnabled(True)
-        tab["Button_kill"].setEnabled(True)
-        tab["Button_reset"].setEnabled(True)
-        tab["Button_info"].setEnabled(True)
-        
+        try:
+            tab["conn"].reconnect()
+        except Exception as e:
+            self.error_box(e, "Reconnection failed!")
+        else:
+            tab["Button_reco"].setEnabled(False)
+            tab["Button_disconnect"].setEnabled(True)
+            tab["Button_kill"].setEnabled(True)
+            tab["Button_reset"].setEnabled(True)
+            tab["Button_info"].setEnabled(True)
+    
+    def error_box(self, e, message: str = ""):
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText(f"{message} ({e})")
+            msg.exec()
 
     @property
     def tabs_open(self) -> int:
