@@ -60,6 +60,7 @@ class Server:
     
     TODO: when messages are comming to fast, this function is not fast enough
     and crashes the server
+    FIXME: stderr not returned
     """
 
     def __handle(self, message: str, addr: tuple):
