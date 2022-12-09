@@ -78,36 +78,35 @@ class Server:
         elif message[:7] == "command":
             command = json.loads(message[7:])
             logging.info(f"Executing {command}")
-            rep = ""
+            rep = "cmmd"
             if command["shell"] == "dos":
                 if sys.platform == "win32":
-                    rep = actions.send_command(command["com"], "dos")
+                    rep += actions.send_command(command["com"], "dos")
                 else:
-                    rep = "Cannot execute a DOS command on this operating system."
+                    rep += "Cannot execute a DOS command on this operating system."
                     logging.error(rep)
             elif command["shell"] == "powershell":
                 if sys.platform == "win32":
-                    rep = actions.send_command(command["com"], "powershell")
+                    rep += actions.send_command(command["com"], "powershell")
                 else:
-                    rep = (
+                    rep += (
                         "Cannot execute a powershell command on this operating system."
                     )
                     logging.error(rep)
             elif command["shell"] == "linux":
                 if sys.platform == "linux":
-                    rep = actions.send_command(command["com"], "bash")
+                    rep += actions.send_command(command["com"], "bash")
                 else:
-                    rep = "Cannot execute a linux command on this operating system."
+                    rep += "Cannot execute a linux command on this operating system."
                     logging.error(rep)
-
             elif command["shell"] == "osef":
-                rep = actions.send_command(command["com"])
+                rep += actions.send_command(command["com"])
             else:
-                rep = f"Shell '{command['shell']}' is not recognised. Available values are: dos, powershell, linux"
+                rep += f"Shell '{command['shell']}' is not recognised. Available values are: dos, powershell, linux"
 
             # We send the output from commands, ugly but works i guess
             # FIXME: Client recieve only a small part of the output
-            self.client.send(("cmmd" + rep).encode())
+            self.client.send(rep.encode())
 
     """
     Retries to bind the socked every 10 seconds.

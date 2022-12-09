@@ -93,7 +93,7 @@ def get_all():
 # TODO: return smth for mkdir???
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
-    if shell == "default" and sys.platform == "win32":
+    if (shell == "default" and sys.platform == "win32") or shell == "dos":
         return (
             subprocess.Popen(
                 command,
