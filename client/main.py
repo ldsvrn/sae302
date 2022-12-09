@@ -246,12 +246,16 @@ class Tab(QWidget):
                     continue
 
     def disconnect(self, tab: dict, action: str):
-        if action == "disconnect":
-            tab["conn"].disconnect()
-        elif action == "reset":
-            tab["conn"].reset()
-        elif action == "kill":
-            tab["conn"].kill()
+        try:
+            if action == "disconnect":
+                tab["conn"].disconnect()
+            elif action == "reset":
+                tab["conn"].reset()
+            elif action == "kill":
+                tab["conn"].kill()
+        except Exception as e:
+            self.error_box(e, f"Action {action} failed!")
+            logging.error(f"Action {action} failed! ({e})")
         tab["Button_reco"].setEnabled(True)
         tab["Button_disconnect"].setEnabled(False)
         tab["Button_kill"].setEnabled(False)
