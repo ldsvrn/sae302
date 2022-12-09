@@ -35,7 +35,8 @@ class Connection:
 
     def __handle(self, conn) -> None:
         while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:
-            self.msgsrv = conn.recv(2048)
+            self.msgsrv = conn.recv(4096)
+            logging.debug(f"Size of the recieved message is {len(self.msgsrv)}")
             if not self.msgsrv:
                 break  # prevents infinite loop on disconnect, auto disconnect clients
             self.msgsrv = self.msgsrv.decode()

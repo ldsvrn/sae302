@@ -93,12 +93,8 @@ class Tab(QWidget):
             pass
         else:
             for conn in self.servers:
-                try:
-                    self._create_tab(conn["name"], conn["ip"], conn["port"])
-                except Exception as e:
-                    self.error_box(
-                        e, f"Connection to {conn['name']}, {conn['ip']}:{conn['port']}!"
-                    )
+                self._create_tab(conn["name"], conn["ip"], conn["port"])
+
 
         self.LineEdit_addr = QLineEdit("IP")
         self.LineEdit_port = QLineEdit("Port")
@@ -122,7 +118,7 @@ class Tab(QWidget):
         except Exception as e:
             logging.error(f"Connection to {name}, {ip}:{port} failed! ({e})")
             self.error_box(
-                e, f"Connection to {name}, {ip}:{port} failed!"
+                e, f"Connection to {name} ({ip}:{port}) failed!"
             )
         else:
             self.tabs.append(

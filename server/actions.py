@@ -90,6 +90,7 @@ def get_all():
 
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
 # FIXME: stderr is not returned, this is a problem when the command is not found
+# TODO: return smth for mkdir???
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
     if shell == "default" and sys.platform == "win32":
