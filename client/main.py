@@ -2,6 +2,7 @@
 import sys
 import csv
 import logging
+import os
 
 import connection
 
@@ -81,9 +82,9 @@ class Tab(QWidget):
         self.servers = []
         # Add a bunch of tabs
 
-        # FIXME: should be relative to the script location
+        script_dir = os.path.dirname(__file__)
         try:
-            with open("servers.csv", "r") as csvfile:
+            with open(os.path.join(script_dir, "servers.csv"), "r") as csvfile:
                 for row in csv.reader(csvfile):
                     self.servers.append(
                         {"name": str(row[0]), "ip": str(row[1]), "port": int(row[2])}
@@ -195,8 +196,6 @@ class Tab(QWidget):
 
             tab["Button_info"].clicked.connect(lambda: tab["conn"].send("info"))
 
-            # FIXME: Broken Pipe if trying to disconenect from an already disconnected server
-            #
             tab["Button_disconnect"].clicked.connect(
                 lambda: self.disconnect(tab, "disconnect")
             )

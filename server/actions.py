@@ -130,6 +130,7 @@ def send_command(command: str, shell: str = "default"):
             .decode()
             .rstrip()
         )
+    #FIXME: powershell just returns the command
     elif shell == "powershell":
         return (
             subprocess.Popen(
