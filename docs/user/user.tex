@@ -133,4 +133,19 @@ To send a command to the server, enter the command in the field and press the
 enter key. The ComboBox offers a choice of different shells, such as DOS or
 PowerShell for Windows. To clear the screen, use the button next to the command
 field.
+
+\newpage
+\subsection{Save servers in a CSV file}
+The application is able to connect automatically on servers at startup, this is
+done using the \verb|servers.csv| file. This file must be in the same directory
+as the application's \verb|main.py| file. The application excepts a comma
+separated list of: the server's name, IP address and port.
+\begin{listing}[H]
+    \begin{minted}[breaklines]{text}
+dev serv,localhost,10000
+test serv,localhost,10001
+    \end{minted}
+    \caption{Example of a CSV file expected by the client}
+    \label{venv:csv}
+\end{listing}
 \end{document}
