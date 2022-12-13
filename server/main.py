@@ -7,11 +7,9 @@ import time
 import actions
 import json
 
+DEBUG = True
+
 logging.basicConfig(level=logging.DEBUG)
-
-HOST = ("127.0.0.1", int(sys.argv[1]))
-
-
 class Server:
     def __init__(self, host: tuple):
         self.host = host
@@ -137,12 +135,19 @@ class Server:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        raise Exception("Missing port or too much arguments.")
+    port = 10000
+    try: 
+        port = int(sys.argv[1])
+    except:
+        # Is is either a IndexError or a ValueError, default on port 10000 on both cases
+        logging.warning(f"Invalid or no port given, using default port {port}...")
 
-    host = ("127.0.0.1", int(sys.argv[1]))
-    
-    server = Server(host)
+    if DEBUG:
+        host = "127.0.0.1"
+    else:
+        host = "0.0.0.0"
+
+    server = Server((host, port))
     try:
         server.start()
     except KeyboardInterrupt:
