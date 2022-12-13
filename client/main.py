@@ -74,13 +74,13 @@ class Tab(QWidget):
 
         # Create Tab Widget
         self.tabwidget = QTabWidget()
-        # TODO: implement a way to close tabs
-        self.tabwidget.setTabsClosable(False)
-        self.tabwidget.setMovable(True)
+
+        self.tabwidget.setTabsClosable(True)
+        self.tabwidget.setMovable(False)
+        self.tabwidget.tabCloseRequested.connect(self._closetab)
 
         self.tabs = []
         self.servers = []
-        # Add a bunch of tabs
 
         script_dir = os.path.dirname(__file__)
         try:
@@ -203,6 +203,15 @@ class Tab(QWidget):
             tab["Button_reset"].clicked.connect(lambda: self.disconnect(tab, "reset"))
 
             tab["Button_reco"].clicked.connect(lambda: self.reco(tab))
+
+    def _closetab(self, index: int):
+        logging.info(f"Closing tab index {index}")
+        
+        self.disconnect(self.tabs[index], "disconnect")
+        #time.sleep(1) TODO: check if we need to wait before poping the widgets
+        self.tabs.pop(index)
+        self.tabwidget.removeTab(index)
+
 
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
