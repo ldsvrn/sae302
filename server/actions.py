@@ -89,7 +89,7 @@ def get_all():
 
 
 # check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
-# FIXME: stderr is not returned, this is a problem when the command is not found
+# FIXME: stderr is not returned WHY im giving up at this point
 # TODO: return smth for mkdir???
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
@@ -101,8 +101,10 @@ def send_command(command: str, shell: str = "default"):
                 encoding="cp850",
             )
         # here it is a subprocess.CompletedProcess
-        out, err = p.communicate()
-        return f"{out.rstrip()}{err.rstrip()}"
+        out, err = "", ""
+        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
+        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        return f"{out}{err}"
     elif shell == "default" and sys.platform in ("linux", "darwin"):
         p = subprocess.Popen(
                 command,
@@ -110,8 +112,10 @@ def send_command(command: str, shell: str = "default"):
                 stdout=subprocess.PIPE,
             )
         # here it is a subprocess.CompletedProcess
-        out, err = p.communicate()
-        return f"{out.rstrip()}{err.rstrip()}"
+        out, err = "", ""
+        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
+        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        return f"{out}{err}"
     elif shell == "bash":
         p = subprocess.Popen(
                 f"/bin/bash -c '{command}'",
@@ -119,21 +123,21 @@ def send_command(command: str, shell: str = "default"):
                 stdout=subprocess.PIPE,
             )
         # here it is a subprocess.CompletedProcess
-        out, err = p.communicate()
-        return f"{out.rstrip()}{err.rstrip()}"
+        out, err = "", ""
+        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
+        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        return f"{out}{err}"
     #FIXME: powershell just returns the command
     elif shell == "powershell":
-        return (
-            subprocess.Popen(
+        p = subprocess.Popen(
                 f"powershell.exe '{command}'",
                 shell=True,
                 stdout=subprocess.PIPE,
             )
-            # here it is a subprocess.CompletedProcess
-            .stdout.read()
-            .decode()
-            .rstrip()
-        )
+        out, err = "", ""
+        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
+        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        return f"{out}{err}"
 
 
 if __name__ == "__main__":
