@@ -75,7 +75,7 @@ class Tab(QWidget):
         # Create Tab Widget
         self.tabwidget = QTabWidget()
         # TODO: implement a way to close tabs
-        self.tabwidget.setTabsClosable(True)
+        self.tabwidget.setTabsClosable(False)
         self.tabwidget.setMovable(True)
 
         self.tabs = []
@@ -113,6 +113,7 @@ class Tab(QWidget):
         TextBrowser_resultcommand = QTextBrowser()
         # Never crash when connectiong to a server, instead send notification to user
         try:
+            logging.info(f"Connecting to {name}, {ip}:{port}...")
             conn = connection.Connection(
                 ip, port, Label_info, TextBrowser_resultcommand
             )
@@ -176,14 +177,13 @@ class Tab(QWidget):
             tab["widget_right"].layout.addWidget(tab["LineEdit_sendcommand"], 4, 1)
             tab["widget_right"].layout.addWidget(tab["Button_clear"], 4, 2)
 
-            # TODO: try this on windows to check if "monospace" works
+            # Only works on linux or maybe os x 
             tab["TextBrowser_resultcommand"].setFont(QFont("monospace"))
             tab["TextBrowser_resultcommand"].setAcceptRichText(True)
             tab["TextBrowser_resultcommand"].setOpenExternalLinks(True)
 
             tab["ComboBox_shell"].addItems(["default", "dos", "powershell", "linux"])
 
-            # TODO: shell selection (combobox)
             tab["LineEdit_sendcommand"].returnPressed.connect(
                 lambda: self._send_command(
                     tab["conn"], tab["LineEdit_sendcommand"], tab["ComboBox_shell"]

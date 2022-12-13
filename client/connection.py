@@ -28,7 +28,9 @@ class Connection:
 
         # Flag to kill the handle thread
         self.__killed = False
+        self.msgsrv = ""
         # Starting handle thread for incoming messages
+        print(self.__killed)
         client_handler = threading.Thread(target=self.__handle, args=[self.client])
         client_handler.start()
 

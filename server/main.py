@@ -137,7 +137,12 @@ class Server:
 
 
 if __name__ == "__main__":
-    server = Server(HOST)
+    if len(sys.argv) != 2:
+        raise Exception("Missing port or too much arguments.")
+
+    host = ("127.0.0.1", int(sys.argv[1]))
+    
+    server = Server(host)
     try:
         server.start()
     except KeyboardInterrupt:

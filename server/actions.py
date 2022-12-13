@@ -94,42 +94,33 @@ def get_all():
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
     if (shell == "default" and sys.platform == "win32") or shell == "dos":
-        return (
-            subprocess.Popen(
+        p = subprocess.Popen(
                 command,
                 shell=True,
                 stdout=subprocess.PIPE,
                 encoding="cp850",
             )
-            # here it is a subprocess.CompletedProcess
-            .stdout.read()
-            .rstrip()
-        )
+        # here it is a subprocess.CompletedProcess
+        out, err = p.communicate()
+        return f"{out.rstrip()}{err.rstrip()}"
     elif shell == "default" and sys.platform in ("linux", "darwin"):
-        return (
-            subprocess.Popen(
+        p = subprocess.Popen(
                 command,
                 shell=True,
                 stdout=subprocess.PIPE,
             )
-            # here it is a subprocess.CompletedProcess
-            .stdout.read()
-            .decode()
-            .rstrip()
-        )
-        # TODO:check if i need to use a list of args
+        # here it is a subprocess.CompletedProcess
+        out, err = p.communicate()
+        return f"{out.rstrip()}{err.rstrip()}"
     elif shell == "bash":
-        return (
-            subprocess.Popen(
+        p = subprocess.Popen(
                 f"/bin/bash -c '{command}'",
                 shell=True,
                 stdout=subprocess.PIPE,
             )
-            # here it is a subprocess.CompletedProcess
-            .stdout.read()
-            .decode()
-            .rstrip()
-        )
+        # here it is a subprocess.CompletedProcess
+        out, err = p.communicate()
+        return f"{out.rstrip()}{err.rstrip()}"
     #FIXME: powershell just returns the command
     elif shell == "powershell":
         return (
