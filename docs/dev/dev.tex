@@ -1,0 +1,154 @@
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{article}
+\usepackage[english]{babel}
+\author{Louis DESVERNOIS}
+\title{%
+    SAÉ3.02 \\
+    \large Developer documentation}
+% \date{9 Juin 2022}
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{minted}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
+
+\setcounter{tocdepth}{2} % pour la profondeur de la ToC
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\rfoot{\thepage}
+\lfoot{SAÉ3.02: Louis DESVERNOIS}
+
+\setlength{\parindent}{0ex}
+
+%\renewcommand{\listoflistingscaption}{Table des codes}
+%\renewcommand{\listingscaption}{Code}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\listoffigures
+\listoflistings
+
+\newpage
+\section{Introduction}
+This document is the developer documentation for the remote control program made
+for the SAÉ3.04.
+
+\section{Server}
+The server consists of two Python files, \verb|main.py| which contains the main
+server class and \verb|action.py| which is used to obtain information about the
+machine and execute commands.
+
+\subsection{Server class}
+The server is implemented using a Python class and is relatively simple, as it
+only accepts one client at a time.
+
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+class Server:
+    def __init__(self, host: tuple):
+        self.host = host
+        self.killed = False
+    \end{minted}
+    \caption{Server constructor}
+    \label{serv:init}
+\end{listing}
+
+The server class only takes a tuple \verb|(host, port)| as an argument. It does
+not connect automatically, instead the \verb|start()| method has to be used,
+this allows for a "clean" shutdown of the server if we except for a
+\verb|KeyboardInterrupt|.
+
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+if __name__ == "__main__":
+    server = Server((host, port))
+    try:
+        server.start()
+    except KeyboardInterrupt:
+        logging.info("KeyboardInterrupt: killing server...")
+        server.kill()
+    \end{minted}
+    \caption{Starting the server}
+    \label{serv:start}
+\end{listing}
+
+Once the \verb|start()| method is called, the server creates the socket, listens
+on the specified port. Once a client is connected, it will wait for incoming
+messages.
+
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def start(self):
+    while not self.killed:
+        self.server = socket.socket()
+        # While True loop
+        self.__bind(self.host)
+        self.server.listen(1)
+        message = ""
+        while not self.killed and message != "reset":
+            self.client, addr = self.server.accept()
+            message = ""  # reset so we can reconnect
+            while (
+                not self.killed and message != "reset" and message != "disconnect"
+            ):
+                # Here we wait for a message
+                self.__handle(message, addr)
+            # Close connection to client
+        # Close the server
+    # Kill the process
+    \end{minted}
+    \caption{start() method simplified}
+    \label{serv:startmethod}
+\end{listing}
+The server will try to indefinitely bind itself to the specified port (at line 5
+in Listing \ref{serv:startmethod}), this is done to ensure that the server can rebind to
+the port after a reset.
+
+Once a message is received it is sent to the \verb|__handle(message, addr)|
+(line 15), this method serves no purposes other than code readability and
+maintainability. \emph{This is where new features would be added.}
+
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def __handle(self, message: str, addr: tuple):
+    if message == "kill":
+        logging.info(f"Kill requested by {addr}...")
+        self.killed = True  # avoid adding a condition to while loops
+    elif message == "reset":
+        logging.info(f"Client at {addr} requested a reset.")
+    elif message == "info":
+        self.client.send(("info" + json.dumps(actions.get_all())).encode())
+    elif message[:7] == "command":
+        command = json.loads(message[7:])
+        rep = "cmmd"
+        if command["shell"] == "dos":
+            if sys.platform == "win32":
+                rep += actions.send_command(command["com"], "dos")
+            else:
+                rep += "Cannot execute a DOS command on this operating system."
+        # ... More elif to handle other OSs
+        self.client.send(rep.encode())
+    \end{minted}
+    \caption{Handle method simplified}
+    \label{serv:handlemethod}
+\end{listing}
+
+The first two conditions do not do much except print a log in the console.
+However, if the server receive "info" from a client, it replies with a JSON
+encoded dict object containing information about the machine (the info is
+gathered using \verb|action.py|). 
+
+If a message starts with the word "command", the server will try executing the
+given command if the shell selected by the user is available and send the output
+back to the client.
+\section{Client}
+
+\end{document}

@@ -58,14 +58,10 @@ class Server:
     
     TODO: when messages are comming to fast, this function is not fast enough
     and crashes the server
-    FIXME: stderr not returned
     """
 
     def __handle(self, message: str, addr: tuple):
-        if message == "dostuff":
-            print("didstuff")
-            self.client.send("didstuff".encode())
-        elif message == "kill":
+        if message == "kill":
             logging.info(f"Kill requested by {addr}...")
             self.killed = True  # avoid adding a condition to while loops
         elif message == "reset":
