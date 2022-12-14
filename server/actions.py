@@ -91,6 +91,7 @@ def get_all():
 # TODO: append the response to a success string so the client knows when a no output command is successful
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
+    ret = ""
     if (shell == "default" and sys.platform == "win32") or shell == "dos":
         p = subprocess.Popen(
                 command,
@@ -101,7 +102,7 @@ def send_command(command: str, shell: str = "default"):
             )
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
-        return f"{out}{err}"
+        ret = f"{out}{err}"
     elif shell == "default" and sys.platform in ("linux", "darwin"):
         p = subprocess.Popen(
                 command,
@@ -112,7 +113,7 @@ def send_command(command: str, shell: str = "default"):
             )
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
-        return f"{out}{err}"
+        ret = f"{out}{err}"
     elif shell == "bash":
         p = subprocess.Popen(
                 f"/bin/bash -c '{command}'",
@@ -123,7 +124,7 @@ def send_command(command: str, shell: str = "default"):
             )
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
-        return f"{out}{err}"
+        ret = f"{out}{err}"
     #FIXME: powershell just returns the command
     elif shell == "powershell":
         p = subprocess.Popen(
@@ -135,8 +136,10 @@ def send_command(command: str, shell: str = "default"):
             )
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
-        return f"{out}{err}"
+        ret = f"{out}{err}"
 
+    # we add some text at the end to let the user know the command has been executed
+    return ret + f"\nCommand {command} executed."
 
 if __name__ == "__main__":
     print(get_all())
