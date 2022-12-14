@@ -37,7 +37,11 @@ class Connection:
 
     def __handle(self, conn) -> None:
         while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:
-            self.msgsrv = conn.recv(4096)
+            try:
+                self.msgsrv = conn.recv(4096)
+            except Exception as e:
+                logging.error(f"Receive failed: {e}")
+                break
             logging.debug(f"Size of the recieved message is {len(self.msgsrv)}")
             if not self.msgsrv:
                 break  # prevents infinite loop on disconnect, auto disconnect clients
@@ -53,6 +57,7 @@ class Connection:
                 self.label_command.append(self.msgsrv[4:])
 
         logging.debug(f"Closing handle thread for {self.addr}")
+        self.client.close()
         self.__killed = True
     
     def _info_string(self) -> str:

@@ -88,9 +88,7 @@ def get_all():
     }
 
 
-# check shlex.split() for security https://docs.python.org/3/library/shlex.html#shlex.split
-# FIXME: stderr is not returned WHY im giving up at this point
-# TODO: return smth for mkdir???
+# TODO: append the response to a success string so the client knows when a no output command is successful
 def send_command(command: str, shell: str = "default"):
     # this is kind of dangerous
     if (shell == "default" and sys.platform == "win32") or shell == "dos":
@@ -98,34 +96,33 @@ def send_command(command: str, shell: str = "default"):
                 command,
                 shell=True,
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 encoding="cp850",
             )
-        # here it is a subprocess.CompletedProcess
-        out, err = "", ""
-        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
-        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        out= p.stdout.read().rstrip()
+        err= p.stderr.read().rstrip()
         return f"{out}{err}"
     elif shell == "default" and sys.platform in ("linux", "darwin"):
         p = subprocess.Popen(
                 command,
                 shell=True,
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding="utf-8",
             )
-        # here it is a subprocess.CompletedProcess
-        out, err = "", ""
-        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
-        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        out= p.stdout.read().rstrip()
+        err= p.stderr.read().rstrip()
         return f"{out}{err}"
     elif shell == "bash":
         p = subprocess.Popen(
                 f"/bin/bash -c '{command}'",
                 shell=True,
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding="utf-8"
             )
-        # here it is a subprocess.CompletedProcess
-        out, err = "", ""
-        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
-        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        out= p.stdout.read().rstrip()
+        err= p.stderr.read().rstrip()
         return f"{out}{err}"
     #FIXME: powershell just returns the command
     elif shell == "powershell":
@@ -133,10 +130,11 @@ def send_command(command: str, shell: str = "default"):
                 f"powershell.exe '{command}'",
                 shell=True,
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding="utf-8"
             )
-        out, err = "", ""
-        out= p.stdout.read().decode().rstrip() if p.stdout != None else ""
-        err= p.stderr.read().decode().rstrip() if p.stderr != None else ""
+        out= p.stdout.read().rstrip()
+        err= p.stderr.read().rstrip()
         return f"{out}{err}"
 
 
