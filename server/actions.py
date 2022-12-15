@@ -125,14 +125,13 @@ def send_command(command: str, shell: str = "default"):
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
         ret = f"{out}{err}"
-    #FIXME: powershell just returns the command
     elif shell == "powershell":
         p = subprocess.Popen(
                 f'powershell.exe "{command}"',
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                encoding="utf-8"
+                encoding="cp850"
             )
         out= p.stdout.read().rstrip()
         err= p.stderr.read().rstrip()
