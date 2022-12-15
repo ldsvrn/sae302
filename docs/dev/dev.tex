@@ -150,5 +150,96 @@ If a message starts with the word "command", the server will try executing the
 given command if the shell selected by the user is available and send the output
 back to the client.
 \section{Client}
+The client consists of two classes the spans across two python files,
+\verb|main.py| contains the GUI, and the file \verb |connection.py| is the
+server connection, which is a sepatate class to allow the client to connect to
+multiple servers.
+
+\subsection{Connection class}
+This class handles all of the communication to the server, including sockets and
+all actions. The connection object takes an IP address, a port as well as two
+GUI object to write information to. This makes showing data to the user as soon
+the message is received.
+
+\subsubsection{Initialization}
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def __init__(
+    self, host: str, port: int, label_info: QLabel, label_command: QTextBrowser
+) -> None:
+    self.client = socket.socket()
+    self.msgsrv = ""
+    self.addr = (host, port)
+    self.info = {}
+
+    self.label_info = label_info
+    self.label_command = label_command
+
+    self.__connect()
+    self.send("info")
+    \end{minted}
+    \caption{Connection init method}
+    \label{client:init}
+\end{listing}
+
+The \verb|__connect()| is used to connect to the server, having is sepatate
+method allows reconnecting to the server after a disconnect. Once we are
+connected to the server, a "info" request is automatically send\footnote{This
+can cause the client to hang at startup since the connection is not threaded}. 
+
+
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def __connect(self) -> None:
+    self.client.connect(self.addr)
+    # Flag to kill the handle thread
+    self.__killed = False
+    self.msgsrv = ""
+    # Starting handle thread for incoming messages
+    client_handler = threading.Thread(target=self.__handle, args=[self.client])
+    client_handler.start()
+    \end{minted}
+    \caption{\_\_connect method}
+    \label{client:connect}
+\end{listing}
+
+This method connects to the server and start the receive thread, the
+\verb|self.killed| variable is used as a condition to keep the receive running,
+allowing it to be killed easily.
+
+\subsubsection{Threaded code}
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def __handle(self, conn) -> None:
+    while self.msgsrv != "kill" and self.msgsrv != "reset" and not self.__killed:
+        try:
+            self.msgsrv = conn.recv(4096)
+        except Exception as e:
+            logging.error(f"Receive failed: {e}")
+            break
+        logging.debug(f"Size of the recieved message is {len(self.msgsrv)}")
+        if not self.msgsrv:
+            break  # prevents infinite loop on disconnect, auto disconnect clients
+        self.msgsrv = self.msgsrv.decode()
+        logging.info(f"Message from {self.addr}: {self.msgsrv}")
+
+        if self.msgsrv[:4] == "info":
+            self.info = json.loads(self.msgsrv[4:])
+            logging.info("Got the server information.")
+            self.label_info.setText(self._info_string())
+        elif self.msgsrv[:4] == "cmmd":
+            logging.info("Got a command output from the server.")
+            self.label_command.append(self.msgsrv[4:])
+
+    logging.debug(f"Closing handle thread for {self.addr}")
+    self.client.close()
+    self.__killed = True
+    \end{minted}
+    \caption{Threaded code}
+    \label{client:thread}
+\end{listing}
+
+The client receives as long as the server is not killed, reset or the
+\verb|self.killed| variable is not set to \verb|True|. 
 
 \end{document}

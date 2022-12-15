@@ -46,14 +46,14 @@ class Connection:
             if not self.msgsrv:
                 break  # prevents infinite loop on disconnect, auto disconnect clients
             self.msgsrv = self.msgsrv.decode()
-            logging.debug(f"Message from {self.addr}: {self.msgsrv}")
+            logging.info(f"Message from {self.addr}: {self.msgsrv}")
 
             if self.msgsrv[:4] == "info":
                 self.info = json.loads(self.msgsrv[4:])
-                logging.debug("Got the server information.")
+                logging.info("Got the server information.")
                 self.label_info.setText(self._info_string())
             elif self.msgsrv[:4] == "cmmd":
-                logging.debug("Got a command output from the server.")
+                logging.info("Got a command output from the server.")
                 self.label_command.append(self.msgsrv[4:])
 
         logging.debug(f"Closing handle thread for {self.addr}")
