@@ -128,7 +128,7 @@ def send_command(command: str, shell: str = "default"):
     #FIXME: powershell just returns the command
     elif shell == "powershell":
         p = subprocess.Popen(
-                f"powershell.exe '{command}'",
+                f'powershell.exe "{command}"',
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
