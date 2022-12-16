@@ -203,7 +203,9 @@ class Tab(QWidget):
             tab["Button_reset"].clicked.connect(lambda: self.disconnect(tab, "reset"))
 
             tab["Button_reco"].clicked.connect(lambda: self.reco(tab))
-
+    """
+    Executed when a tab is closed by the user, takes the index as its argument
+    """
     def _closetab(self, index: int):
         logging.info(f"Closing tab index {index}")
         
@@ -212,6 +214,9 @@ class Tab(QWidget):
         self.tabs.pop(index)
         self.tabwidget.removeTab(index)
 
+    """
+    Executed when the "Connect" button is pressed
+    """
 
     def _connect_Clicked(self):
         ip = self.LineEdit_addr.text()
@@ -223,13 +228,17 @@ class Tab(QWidget):
             logging.error(f"Invalid port: {port}")
         else:
             self._create_tab(f"{ip}:{port}", ip, port)
+    
+    """
+    Executed when the "Send" button is pressed, it checks for the selected
+    shell. The objects are passed as argument to avoid using self.tabs and using
+    the tab index. 
+    """
 
     # FIXME: interactive commands make this all fall apart
     def _send_command(
         self, conn: connection.Connection, lineedit: QLineEdit, combobox: QComboBox
     ):
-        # TODO: select shell with combobox
-        # ["default", "dos", "powershell", "linux"]
         idx = combobox.currentIndex()
         if idx == 0:
             conn.execute_command(lineedit.text())
@@ -253,6 +262,10 @@ class Tab(QWidget):
                     )
                     continue
 
+    """
+    Executed when the one of the action button is pressed, it disables the
+    buttons and activate the reconnect button 
+    """
     def disconnect(self, tab: dict, action: str):
         try:
             if action == "disconnect":
@@ -269,6 +282,10 @@ class Tab(QWidget):
         tab["Button_kill"].setEnabled(False)
         tab["Button_reset"].setEnabled(False)
         tab["Button_info"].setEnabled(False)
+
+    """
+    Executed when the reconnect button is pressed
+    """
 
     def reco(self, tab):
         try:

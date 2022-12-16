@@ -247,11 +247,14 @@ class has access to\footnote{The \_info\_string() method returns a formatted
 string of the raw JSON data received from the server}. The \verb|send| method
 checks if the connection is available before transmitting data.
 
+Additional methods are available to the client such as \verb|disconnect|,
+\verb|reconnect|, \verb|kill| or \verb|reset|.
+
 \subsection{GUI}
 This application is using tabs easily access servers with one window. Each tab
 is its own \verb|QHBoxLayout| that contains two \verb|QGridLayout|. The widgets
-and the connection are stored in a dict that is appended to a list (of tabs).
-The \verb|_create_tab()| is handling all the actual widget placement.
+and the connection are stored in a \verb|dict| that is appended to a list (of
+tabs). The \verb|_create_tab()| is handling all the actual widget placement.
 
 \subsubsection{Threaded code}
 \begin{listing}[H]
@@ -301,5 +304,7 @@ creation of the connection. For the actual connection we except all exceptions
 and store the message is en \verb|e| variable, so we can notify the user of the
 error without crashing the application, the tab is only created if not except
 are encountered while connecting.
+
+Other methods are briefly explained in the source code.
 
 \end{document}
