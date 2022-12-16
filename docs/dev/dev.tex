@@ -1,7 +1,7 @@
 % !TEX encoding = UTF-8 Unicode
 
 \documentclass{article}
-\usepackage[english]{babel}
+\usepackage[british]{babel}
 \author{Louis DESVERNOIS}
 \title{%
     SAÉ3.02 \\
@@ -39,7 +39,8 @@
 \newpage
 \section{Introduction}
 This document is the developer documentation for the remote control program made
-for the SAÉ3.04.
+for the SAÉ3.04. On both the server and client, setting the \verb|DEBUG|
+constant in the beginning of each file to \verb|True| will change some default behaviour 
 
 \section{Server}
 The server consists of two Python files, \verb|main.py| which contains the main
@@ -152,13 +153,13 @@ back to the client.
 \section{Client}
 The client consists of two classes the spans across two python files,
 \verb|main.py| contains the GUI, and the file \verb |connection.py| is the
-server connection, which is a sepatate class to allow the client to connect to
+server connection, which is a class that allows the client to connect to
 multiple servers.
 
 \subsection{Connection class}
-This class handles all of the communication to the server, including sockets and
+This class handles all the communication to the server, including sockets and
 all actions. The connection object takes an IP address, a port as well as two
-GUI object to write information to. This makes showing data to the user as soon
+GUI objects to write information to. This makes showing data to the user as soon
 the message is received.
 
 \subsubsection{Initialization}
@@ -182,9 +183,9 @@ def __init__(
     \label{client:init}
 \end{listing}
 
-The \verb|__connect()| is used to connect to the server, having is sepatate
+\verb|__connect()| is used to connect to the server, having a separate
 method allows reconnecting to the server after a disconnect. Once we are
-connected to the server, a "info" request is automatically send\footnote{This
+connected to the server, an "info" request is automatically sent\footnote{This
 can cause the client to hang at startup since the connection is not threaded}. 
 
 
@@ -204,8 +205,8 @@ def __connect(self) -> None:
 \end{listing}
 
 This method connects to the server and start the receive thread, the
-\verb|self.killed| variable is used as a condition to keep the receive running,
-allowing it to be killed easily.
+\verb|self.killed| variable is used as a condition to keep the reception
+running, allowing it to be killed easily.
 
 \subsubsection{Threaded code}
 \begin{listing}[H]
@@ -240,6 +241,65 @@ def __handle(self, conn) -> None:
 \end{listing}
 
 The client receives as long as the server is not killed, reset or the
-\verb|self.killed| variable is not set to \verb|True|. 
+\verb|self.killed| variable is not set to \verb|True|. Once the type of message
+is detected, we log the message and set the text in one of the GUI element the
+class has access to\footnote{The \_info\_string() method returns a formatted
+string of the raw JSON data received from the server}. The \verb|send| method
+checks if the connection is available before transmitting data.
+
+\subsection{GUI}
+This application is using tabs easily access servers with one window. Each tab
+is its own \verb|QHBoxLayout| that contains two \verb|QGridLayout|. The widgets
+and the connection are stored in a dict that is appended to a list (of tabs).
+The \verb|_create_tab()| is handling all the actual widget placement.
+
+\subsubsection{Threaded code}
+\begin{listing}[H]
+    \begin{minted}[breaklines, linenos]{python}
+def _create_tab(self, name: str, ip: str, port: int):
+    Label_info = QLabel("Placeholder\nPlaceholder\nPlaceholder\nPlaceholder\nPlaceholder")
+    TextBrowser_resultcommand = QTextBrowser()
+    # Never crash when connectiong to a server, instead send notification to user
+    try:
+        logging.info(f"Connecting to {name}, {ip}:{port}...")
+        conn = connection.Connection(
+            ip, port, Label_info, TextBrowser_resultcommand
+        )
+    except Exception as e:
+        logging.error(f"Connection to {name}, {ip}:{port} failed! ({e})")
+        self.error_box(
+            e, f"Connection to {name} ({ip}:{port}) failed!"
+        )
+    else:
+        self.tabs.append(
+            {
+                "widget": QWidget(),
+                "widget_left": QWidget(),
+                "widget_right": QWidget(),
+                "Button_info": QPushButton("Refresh information"),
+                "Label_info": Label_info,
+                "ComboBox_shell": QComboBox(),
+                "LineEdit_sendcommand": QLineEdit(),
+                "Button_clear": QPushButton("Clear"),
+                "TextBrowser_resultcommand": TextBrowser_resultcommand,
+                "Button_disconnect": QPushButton("Disconnect"),
+                "Button_kill": QPushButton("Kill"),
+                "Button_reset": QPushButton("Reset"),
+                "Button_reco": QPushButton("Reconnect"),
+            }
+        )
+        tab = self.tabs[-1]
+        # We then use the tab variable to access all of the tab's elements
+        ...
+    \end{minted}
+    \caption{Beginning of the \_create\_tab() method}
+    \label{client:createtab}
+\end{listing}
+
+First we create a \verb|QLabel| and a \verb|QTextBrowser| to use for the
+creation of the connection. For the actual connection we except all exceptions
+and store the message is en \verb|e| variable, so we can notify the user of the
+error without crashing the application, the tab is only created if not except
+are encountered while connecting.
 
 \end{document}

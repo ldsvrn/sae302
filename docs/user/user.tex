@@ -1,7 +1,7 @@
 % !TEX encoding = UTF-8 Unicode
 
 \documentclass{article}
-\usepackage[english]{babel}
+\usepackage[british]{babel}
 \author{Louis DESVERNOIS}
 \title{%
     SAÉ3.02 \\
@@ -46,7 +46,7 @@ the SAÉ3.04. It dwells upon the server deployment and the user frontend.
 The server uses the \verb|psutil| package from PyPI, either install it
 system-wide using \verb|pip install psutil| or in a virtual environment with the
 following commands. This package provides easy access to information such as the
-CPU and RAM utilization or IP addresses.
+CPU and RAM utilisation or IP addresses.
 
 \begin{listing}[H]
     \begin{minted}[breaklines]{bash}
@@ -116,8 +116,9 @@ commands to the server.
     \label{client:left}
 \end{figure}
 This section is used to control the server state, the buttons allows to either
-disconnect from the server, kill the server and reset the server\footnote{This
-recreates the socket on the server side, it can take up to a minute.}. Once one
+disconnect from the server\footnote{Closing the tab automatically disconnects
+the client from the server}, kill the server and reset the server\footnote{This
+recreates the socket on the server side, it can take up to a minute}. Once one
 of these buttons are pressed, the "Reconnect" is enabled. The information about
 the machine is automatically requested when the connection is created, however,
 the "Refresh information" button is available as long as the client is still
